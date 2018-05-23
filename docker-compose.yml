@@ -1,0 +1,11 @@
+version: '2'
+services:
+  work:
+    build: ./docker
+    command: jupyter notebook --allow-root
+    ports:
+      - "8050:8888" # Jupyter Notebook
+    volumes:
+      - .:/root/work
+      - ../dataStore_upconversion:/root/dataStore_upconversion
+      
