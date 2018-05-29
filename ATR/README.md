@@ -10,7 +10,7 @@ ATRで取得したlogファイルから`ADLtagger`で使用可能なファイル
 #### sub-command: MIX
 ADLtaggerのファイルフォーマットのAccとGyroを単一のCSVに結合. 出力時に単位を変換.
 
-+ Acc : `0.1[mG]` => `[mG]`
++ Acc : `0.1[mG]` => `[G]`
 + Gyro: `0.01[dps]` => `[dps]`
 
 Ref: 取得したデータのフォーマットは?,  http://www.atr-p.com/support/TSND-QA.html

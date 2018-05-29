@@ -31,36 +31,36 @@ def make_parser():
     single_parser = subparsers.add_parser("SINGLE")
     single_parser.set_defaults(func=main_single)
     single_parser.add_argument('--path-input-root-dir', required=True,
-                        help="Path to the root directory for input")
+                               help="Path to the root directory for input")
     single_parser.add_argument('--path-input-xml', required=True,
-                        help="Path to the label XML file")
+                               help="Path to the label XML file")
     single_parser.add_argument('--path-output-dir', required=True,
-                        help="Path to the root directory for output")
+                               help="Path to the root directory for output")
     single_parser.add_argument('--filename-csv', required=True,
-                        help="Output filename for Sensor data CSV")
+                               help="Output filename for Sensor data CSV")
     single_parser.add_argument('--filename-label', required=True,
-                        help="Output filename for Label data")
+                               help="Output filename for Label data. If you don't use label, set None")
     single_parser.add_argument('--filename-summary', required=True,
-                        help="Output filename for Label summary csv")
+                               help="Output filename for Label summary csv")
 
     ## Mix
     mix_parser = subparsers.add_parser("MIX")
     mix_parser.set_defaults(func=main_mix)
     mix_parser.add_argument('--path-input-root-dir-acc', required=True,
-                        help="Path to the root directory for acc input")
+                            help="Path to the root directory for acc input")
     mix_parser.add_argument('--path-input-root-dir-gyro', required=True,
                             help="Path to the root directory for gyro input")
     mix_parser.add_argument('--path-input-xml', required=True,
-                        help="Path to the label XML file")
+                            help="Path to the label XML file")
     mix_parser.add_argument('--path-output-dir', required=True,
-                        help="Path to the root directory for output")
+                            help="Path to the root directory for output")
     mix_parser.add_argument('--filename-csv', required=True,
-                        help="Output filename for Sensor data CSV")
+                            help="Output filename for Sensor data CSV")
     mix_parser.add_argument('--filename-label', required=True,
-                        help="Output filename for Label data")
+                            help="Output filename for Label data. If you don't use label, set None")
     mix_parser.add_argument('--filename-summary', required=True,
-                        help="Output filename for Label summary csv")
-
+                            help="Output filename for Label summary csv")
+    
     return parser
 
 
@@ -226,11 +226,16 @@ def main_single(args):
 def main_mix(args, merge_with_timestamp=False):
     """ Convert acc&gyro and write into single file
     """
+    # Param
+    add_label = False if args.path_input_xml == "None" else True
     # Load data
     print("Start: Read csv files and label xml data.")
     df_acc = read_csv(args.path_input_root_dir_acc)   # sensor data [Acc CSV]
     df_gyro = read_csv(args.path_input_root_dir_gyro)   # sensor data [Gryro CSV]
-    df_label = read_label_xml(args.path_input_xml)  # label  data [XML]
+    if add_label == "True":
+        df_label = read_label_xml(args.path_input_xml)  # label  data [XML]
+    else:
+        df_label = pd.DataFrame()
     ## Rename Columns
     df_acc  = df_acc.rename(columns={"x":"acc_x","y":"acc_y","z":"acc_z"})
     df_gyro = df_gyro.rename(columns={"x":"gyro_x","y":"gyro_y","z":"gyro_z"})
@@ -239,11 +244,15 @@ def main_mix(args, merge_with_timestamp=False):
     print(">> Success: Read Data[df_acc={}, df_gyro={}, df_label={}]\n".format(df_acc.shape, df_gyro.shape, df_label.shape))
 
     # Merge sensor data and label data
-    print("Start: Add label to sensor data.")
-    df_acc = merge_label(df_acc, df_label)
-    print(df_acc.head(10))
-    print(df_gyro.head(10))
-    print(">> Success: df_acc.shape={}\n".format(df_acc.shape))
+    if add_label == "True":
+        print("Start: Add label to sensor data.")
+        df_acc = merge_label(df_acc, df_label)
+        print(df_acc.head(10))
+        print(df_gyro.head(10))
+        print(">> Success: df_acc.shape={}\n".format(df_acc.shape))
+    else:
+        df_acc["time"] = pd.to_datetime(df_acc["time"], format="%Y%m%d_%H:%M:%S.%f")
+        df_acc["label"], df_acc["label_id"] = "none", -1
 
     # Merge Acc & Gyro
     print("Start: Add label to sensor data.")
@@ -256,17 +265,18 @@ def main_mix(args, merge_with_timestamp=False):
     ## Excahnge the order of columns
     cols = ["time","label","label_id", "acc_x","acc_y","acc_z", "gyro_x","gyro_y","gyro_z"]
     df = df[cols]
-    ## Convert unit [0.1mG ==> mG]
-    df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float) / 10.
+    ## Convert unit [0.1mG ==> G, 0.1dps ==> dps]
+    df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float) / 10000.
     df[["gyro_x","gyro_y","gyro_z",]] = df[["gyro_x","gyro_y","gyro_z",]].astype(float) / 100.
     print(df.head())
     print(">> Success: df.shape={}\n".format(df.shape))
-
+    
     
     # Write
     print("Start: Write CSV files")
     write_csv(df, args.path_output_dir, args.filename_csv)
-    write_labels(df_label, args.path_output_dir, args.filename_label, args.filename_summary)
+    if add_label == "True":
+        write_labels(df_label, args.path_output_dir, args.filename_label, args.filename_summary)
     print(">> Success\n")
     print("Finish !!\n")
     

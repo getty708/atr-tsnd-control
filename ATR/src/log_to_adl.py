@@ -147,7 +147,7 @@ def write_csv(df, path_output_dir):
         # CSV書き込み
         filename = os.path.join(target_path, target_file_name)
         df_selected[["time", "accX", "accY", "accZ"]].to_csv(filename, index=False, header=["time", "x", "y", "z"])
-        print(">> write", target_path+target_file_name)
+        print(">> Done: write [Acc ] =>{}".format(target_path+target_file_name))
 
         # 書き込むディレクトリを選択: Gyro
         ## ディレクトリの確認
@@ -157,7 +157,7 @@ def write_csv(df, path_output_dir):
         # CSV書き込み
         filename = os.path.join(target_path, target_file_name,)
         df_selected[["time", "gyroX", "gyroY", "gyroZ"]].to_csv(filename, index=False, header=["time", "x", "y", "z"])
-        print(">> Done: write", target_path+target_file_name)
+        print(">> Done: write [Gyro] => {}".format(target_path+target_file_name))
     return len(groups)
 
 
