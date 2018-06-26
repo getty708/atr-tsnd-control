@@ -18,6 +18,7 @@ echo frame_size: ${frame_size};
 #     --sub-id       ${sub_id} \
 #     --file-input   /home/dragon/yoshimura/dataStoreRoot/2018_01_16/dataStore/200Hz/mg4_200Hz_sub${sub_id}_mod{mod}_mix.csv \
 #     --file-output  /home/dragon/yoshimura/dataStoreRoot/2018_01_16/dataStore/n64/mg4_200Hz_sub${sub_id}_mod{mod}_{sensor}_{axis}.csv
+
 # Step.3 Add label info
 python ./src/03_add_label.py \
     --sensor       ${sensor} \
