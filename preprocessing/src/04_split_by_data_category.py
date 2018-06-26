@@ -114,20 +114,20 @@ def main():
             # Read CSV
             filename = file_input.format(mod=mod, sensor=sensor, axis=axis)
             print("File name: ", filename)
-            df = pd.read_csv(file_name, index_col=0)
+            df = pd.read_csv(filename, index_col=0)
             df["sub_id"] = df["sub_id"].astype(str).str.zfill(2)
             # Select
-            if _args.data_category == "gesture":
+            if args.data_category == "gesture":
                 df_tmp = extract_gesture_data(df)                     
-            elif _args.data_category == "object":
+            elif args.data_category == "object":
                 df_tmp = extract_object_data(df)
-            elif _args.data_category == "none":
+            elif args.data_category == "none":
                 df_tmp = extract_none_data(df)
             # Add labels
             # file_name_out = './dataStore/n64_{}/mg4_200Hz_sub{}_mod{}_{}_{}.csv'.format(
-            #     _args.data_category,sub_id, mod, sensor,axis)
+            #     args.data_category,sub_id, mod, sensor,axis)
             filename = file_output.format(mod=mod,sensor=sensor,axis=axis,)
-            df_tmp.to_csv(file_name_out, index=True)
+            df_tmp.to_csv(filename, index=True)
             print(">> Success: {} [df_tmp.shape={}]\n".format(filename, df_tmp.shape))
 
 

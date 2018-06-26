@@ -87,8 +87,8 @@ def main():
         for axis in ["x", "y", "z"]:
             # Read CSV
             filename = file_input.format(mod=mod, sensor=sensor, axis=axis)
-            print("File name: ", file_name)
-            df = pd.read_csv(file_name, index_col=0)
+            print("File name: ", filename)
+            df = pd.read_csv(filename, index_col=0)
             df["sub_id"] = df["sub_id"].astype(str).str.zfill(2)
             # Select and Rename
             df_tmp = df[cols]
