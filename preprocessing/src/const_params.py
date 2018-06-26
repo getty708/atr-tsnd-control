@@ -60,7 +60,7 @@ NAME_LIST = {
     "03": {"ID": "03", "NAME":"03_higashinaka", "NAME":"higashinaka", },
     "04": {"ID": "04", "NAME":"04_kamiya",      "NAME":"kamiya", },
     "05": {"ID": "05", "NAME":"05_ishiyama",    "NAME":"ishiyama", },
-    "06": {"ID": "06", "NAME":"06_yoshimura",      "NAME":"yoshimura", },
+    "06": {"ID": "06", "NAME":"06_yoshimura",   "NAME":"yoshimura", },
     "07": {"ID": "07", "NAME":"07_aiko",        "NAME":"aiko", },
     "08": {"ID": "08", "NAME":"08_higashide",   "NAME":"higashide", },
 
