@@ -16,22 +16,6 @@ import argparse
 #
 # Params
 #
-sensor = "acc"
-f_shape = (64, 1) # @100 Hz
-root_dir = "./dataStore/n{}/".format(f_shape[0])
-# name_list = [
-#     "01_kawabe", "02_higashinaka", "03_yasuda", "04_kamiya",
-#     "05_ishiyama", "06_yoshimura", "07_aiko", "08_higashide",
-#     "09_others", "10_others", "11_others", "12_others",
-#     "13_others", "14_others", "15_others",
-#     "16_others", "17_others",
-# ]
-name_list = [
-    "30_hada", "31_teramae","32_torisuke", "33_matsukawa","34_sato","35_hamase",
-    "36_yamasaki","37_koguchi","38_onuma","39_kashiyama","40_yamaguchi",
-    "41_watase","42_oga","43_shigeyoshi","44_hukuda","45_maekawa",
-]
-
 
 """ make paser
 """

@@ -38,18 +38,25 @@ def make_parser():
     """Initialize command line arguments
     """
     parser = argparse.ArgumentParser()
-    parser.set_defaults(func=handle_single_user)
+    parser.add_argument('--sensor',  required=True,
+                        help='seonsor type {acc, gyro}')
+    parser.add_argument('--N',  required=True,
+                        help='window size')
     parser.add_argument('--sub-id',  required=True,
                         help='a sub_id of the user(int)')
-    parser.add_argument('--dir-root',  required=True,
-                        help='a path to a root directory')
+    parser.add_argument('--file-input',  required=True,
+                        help='a path to a input file')    
+    parser.add_argument('--file-output',  required=True,
+                        help='a path to a output file')
+    # parser.add_argument('--dir-root',  required=True,
+    #                     help='a path to a root directory')
     return parser
 
 
 
 """ Framing
 """
-def framing_single_axis(df, sensor, mod, _name, root_dir, f_shape, debug=False):
+def framing_single_axis(df, sensor, mod, user, root_dir, f_shape, debug=False):
     x,y,z = [], [], []
     for i in range(1,len(df)-f_shape[0]*2):
         time, sub_id, mod = df.loc[i+f_shape[0]-1, ["time", "sub_id", "mod"]]
@@ -67,10 +74,10 @@ def framing_single_axis(df, sensor, mod, _name, root_dir, f_shape, debug=False):
     df_z = pd.DataFrame(z, columns=["start_time", "sub_id", "mod", "axis",]+["x_{}".format(k) for k in range(f_shape[0]*2)])
     if not debug:
         file_name = root_dir + 'mg4_200Hz_sub{}_mod{}_{}_{}_framed.csv'
-        df_x.to_csv(file_name.format(ct.NAME_LIST["ID"], mod, sensor, "x"), index=True)
-        df_y.to_csv(file_name.format(ct.NAME_LIST["ID"], mod, sensor, "y"), index=True)
-        df_z.to_csv(file_name.format(ct.NAME_LIST["ID"], mod, sensor, "z"), index=True)
-        print(">> Success: {} \n".format(file_name.format(ct.NAME_LIST["ID"], mod, sensor, "3AXIS")))
+        df_x.to_csv(file_name.format(mod=mod, sensor=sensor, axis="x"), index=True)
+        df_y.to_csv(file_name.format(mod=mod, sensor=sensor, axis="y"), index=True)
+        df_z.to_csv(file_name.format(mod=mod, sensor=sensor, axis="z"), index=True)
+        print(">> Success: {} \n".format(file_name.format(user["ID"], mod, sensor, "3AXIS")))
         
 
 """ 
@@ -86,25 +93,36 @@ def main():
     print("Args:", args)
 
     # Params
-    sensor   = _args.sensor
-    N        = _args.sensor
-    DIR_ROOT = _args.dir_root
+    sensor      = args.sensor
+    N           = int(args.N)
+    sub_id      = args.sub_id
+    # DIR_ROOT   = args.dir_root
+    file_input  = args.file_input
+    file_output = args.file_output
     f_shape = (N, 1) # @100 Hz
 
     """ Framing
     """
     # Select user
-    name = ct.NAME_LIST[_args.user]
-    print("Selected User: ", name["NAME"])
+    user = ct.NAME_LIST[args.sub_id]
+    print("Selected User: ", user["NAME"])
     # Framing
     for mod in range(0,5):
-        file_name = "./dataStore/DownSampled/mg4_200Hz_sub{}_mod{}_{}.csv".format(name["ID"], mod, sensor)
-        df_HR = pd.read_csv(file_name)
-        print("Start Framing: {}".format(file_name))
+        # file_name = "./dataStore/DownSampled/mg4_200Hz_sub{}_mod{}_{}.csv".format(name["ID"], mod, sensor)
+        filename = file_input.format(mod=mod)
+        df_HR = pd.read_csv(filename)
+        print(df_HR.head())
+        cols = ["time", "label", "label_id",] + ["{}_{}".format(sensor, axis) for axis in ["x","y","z"]]
+        df_HR = df_HR[cols]
+        df_HR = df_HR.rename(columns={"{}_{}".format(sensor, axis):"{}".format(axis) for axis in  ["x","y","z"]})
+        if not "sub_id" in df_HR.columns: df_HR["sub_id"] = sub_id
+        if not "mod"    in df_HR.columns:    df_HR["mod"]    = mod
+        print(df_HR.head())
+        print("Start Framing: {}".format(filename))
         print("df_HR.shape=", df_HR.shape)
         print("f_shape=", f_shape)
-        DIR_OUTPUT = ct.get_DIR(DIR_ROOT, N)
-        framing_single_axis(df_HR, sensor, mod, _name, DIR_OUTPUT, f_shape, debug=False)
+        # DIR_OUTPUT = ct.get_DIR(DIR_ROOT, N)
+        framing_single_axis(df_HR, sensor, mod, user, file_output, f_shape, debug=False)
     
 
 
