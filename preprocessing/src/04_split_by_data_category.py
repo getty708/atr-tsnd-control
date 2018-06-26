@@ -11,28 +11,7 @@ import pandas as pd
 import numpy as np
 import argparse
 
-
-"""Params
-"""
-sensor = "acc"
-f_shape = (64, 1) # @100 Hz
-root_dir = "./dataStore/n{}/".format(f_shape[0])
-
-# Name list
-# name_list = [
-#     "01_kawabe",   "02_higashinaka", "03_yasuda", "04_kamiya",
-#     "05_ishiyama", "06_yoshimura",   "07_aiko",   "08_higashide",
-#     "09_others",   "10_others",      "11_others", "12_others",
-#     "13_others",   "14_others",      "15_others",
-#     "16_others", "17_others",
-# ]
-# name_list = [
-#     "30_hada", "31_teramae","32_torisuke", "33_matsukawa","34_sato","35_hamase",
-#     "36_yamasaki","37_koguchi","38_onuma","39_kashiyama","40_yamaguchi",
-#     "41_watase","42_oga","43_shigeyoshi","44_hukuda","45_maekawa",
-# ]
-
-
+import const_params as ct
 
 """ make parser
 """
@@ -40,22 +19,18 @@ def make_parser():
     """Initialize command line arguments
     """
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(title='Sub-Commands')
-
-    # Single 
-    single_parser = subparsers.add_parser('SINGLE')
-    single_parser.set_defaults(func=handle_single_user)
-    parser.add_argument('--user',  required=True,
-                             help='a sub_id of the user(int)')
-    single_parser.add_argument('--data-category',  required=True,
-                               help='{gesture, object, none}')    
-
-    # All
-    all_parser = subparsers.add_parser('all')
-    all_parser.set_defaults(func=handle_all_users)
-    all_parser.add_argument('--data-category',  required=True,
-                               help='{gesture, object, none}')
-    
+    parser.add_argument('--sensor',  required=True,
+                        help='seonsor type {acc, gyro}')
+    parser.add_argument('--N',  required=True,
+                        help='window size')
+    parser.add_argument('--sub-id',  required=True,
+                        help='a sub_id of the user(int)')
+    parser.add_argument('--file-input',  required=True,
+                        help='a path to a input file, e.g.: */n64/{mg4_200Hz_sub01_mod{mod}_{sensor}_{axis}.csv')    
+    parser.add_argument('--file-output',  required=True,
+                        help='a path to a output file, e.g.: */200Hz/{prefix}_200Hz_sub{}_mod{mod}_{sensor_{axis}.csv')    
+    parser.add_argument('--data-category',  required=True,
+                               help='{gesture, object, none}')        
     return parser
 
 
@@ -118,16 +93,27 @@ def extract_none_data(df):
 """ 
 Main
 """
-def handle_single_user(_args, sub_id=None):
-    if not sub_id:
-        _name = name_list[int(_args.user)- 1]
-        sub_id = _name.split("_")[0]
+def main():
+    parser = make_parser()
+    args = parser.parse_args()
+    print("Args:", args)
+    print("\n")
+
+    # Params
+    sensor      = args.sensor
+    N           = int(args.N)
+    sub_id      = args.sub_id
+    user        = ct.NAME_LIST[args.sub_id]
+    file_input  = args.file_input
+    file_output = args.file_output
+    f_shape = (N, 1) # @100 Hz
+
+
     for mod in range(5):
         for axis in ["x", "y", "z"]:
             # Read CSV
-            file_name = './dataStore/n{}_labeled/mg4_200Hz_sub{}_mod{}_{}_{}.csv'.format(
-                f_shape[0], sub_id, mod, sensor, axis)
-            print("File name: ", file_name)
+            filename = file_input.format(mod=mod, sensor=sensor, axis=axis)
+            print("File name: ", filename)
             df = pd.read_csv(file_name, index_col=0)
             df["sub_id"] = df["sub_id"].astype(str).str.zfill(2)
             # Select
@@ -138,25 +124,11 @@ def handle_single_user(_args, sub_id=None):
             elif _args.data_category == "none":
                 df_tmp = extract_none_data(df)
             # Add labels
-            file_name_out = './dataStore/n64_{}/mg4_200Hz_sub{}_mod{}_{}_{}.csv'.format(_args.data_category,sub_id, mod, sensor,axis)
+            # file_name_out = './dataStore/n64_{}/mg4_200Hz_sub{}_mod{}_{}_{}.csv'.format(
+            #     _args.data_category,sub_id, mod, sensor,axis)
+            filename = file_output.format(mod=mod,sensor=sensor,axis=axis,)
             df_tmp.to_csv(file_name_out, index=True)
-            print(">> Success: {} [df_tmp.shape={}]\n".format(file_name_out, df_tmp.shape))
-
-
-
-def handle_all_users(_args):
-    for _name in name_list[:]:
-        sub_id = _name.split("_")[0]
-        handle_single_user(_args, sub_id=sub_id)
-
-
-# ------------------------------------------------------------------------
-def main():
-    parser = make_parser()
-    args = parser.parse_args()
-    print("Args:", args)
-    print("\n")
-    args.func(args)
+            print(">> Success: {} [df_tmp.shape={}]\n".format(filename, df_tmp.shape))
 
 
 # ------------------------------------------------------------------------
