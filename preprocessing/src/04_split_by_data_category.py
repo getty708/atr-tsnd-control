@@ -26,11 +26,11 @@ root_dir = "./dataStore/n{}/".format(f_shape[0])
 #     "13_others",   "14_others",      "15_others",
 #     "16_others", "17_others",
 # ]
-name_list = [
-    "30_hada", "31_teramae","32_torisuke", "33_matsukawa","34_sato","35_hamase",
-    "36_yamasaki","37_koguchi","38_onuma","39_kashiyama","40_yamaguchi",
-    "41_watase","42_oga","43_shigeyoshi","44_hukuda","45_maekawa",
-]
+# name_list = [
+#     "30_hada", "31_teramae","32_torisuke", "33_matsukawa","34_sato","35_hamase",
+#     "36_yamasaki","37_koguchi","38_onuma","39_kashiyama","40_yamaguchi",
+#     "41_watase","42_oga","43_shigeyoshi","44_hukuda","45_maekawa",
+# ]
 
 
 
@@ -42,11 +42,10 @@ def make_parser():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title='Sub-Commands')
 
-
     # Single 
-    single_parser = subparsers.add_parser('single')
+    single_parser = subparsers.add_parser('SINGLE')
     single_parser.set_defaults(func=handle_single_user)
-    single_parser.add_argument('--user',  required=True,
+    parser.add_argument('--user',  required=True,
                              help='a sub_id of the user(int)')
     single_parser.add_argument('--data-category',  required=True,
                                help='{gesture, object, none}')    

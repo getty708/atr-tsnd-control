@@ -1,14 +1,13 @@
 #
 # Preporcessing for No label data
 #
-user_idx=$1;
+sub_id=$1;
 frame_size=8;
 
 
 
 #user_idx=$((${user_id}-29));
-echo user_id = ${user_id}, [user_idx =  ${user_idx}];
-echo frame_size: ${frame_size}
+echo sub_id: ${sub_id}, frame_size: ${frame_size}
 
 # Step.2 Framing
 # python 02_make_frames.py            single --user ${user_idx}
