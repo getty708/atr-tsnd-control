@@ -114,8 +114,8 @@ def add_timestamps(df, base_timestamp):
     # MAIN
     df = df.sort_values(by=["time_ATR"], ascending=True).reset_index(drop=True)
     df["timestamp"] = df["time_ATR"].apply(convert_timestamp) # Convert ADT timestamp to  datatime object
-    df["time"], df["time_milli"] = df["timestamp"].dt.strftime('%Y%m%d_%H:%M:%S.'), df["timestamp"].dt.microsecond // 1000
-    df["time"] = df["time"].astype(str) + df["time_milli"].astype(str).str.zfill(3) # '%Y%m%d_%H:%M:%S.' + '%fff'
+    df["time"], df["time_milli"] = df["timestamp"].dt.strftime('%Y-%m-%d %H:%M:%S.'), df["timestamp"].dt.microsecond // 1000
+    df["time"] = df["time"].astype(str) + df["time_milli"].astype(str).str.zfill(3) # '%Y-%m-%d %H:%M:%S.' + '%fff'
     print(">> Done: df.shape={}".format(df.shape))
     return df
 
