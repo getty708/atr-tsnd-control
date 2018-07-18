@@ -56,7 +56,7 @@ def make_parser():
 
 """ Framing
 """
-def framing_single_axis(df, sensor, mod, user, root_dir, f_shape, debug=False):
+def framing_single_axis(df, sensor, mod, user, file_output, f_shape, debug=False):
     x,y,z = [], [], []
     for i in range(1,len(df)-f_shape[0]*2):
         time, sub_id, mod = df.loc[i+f_shape[0]-1, ["time", "sub_id", "mod"]]
@@ -73,12 +73,10 @@ def framing_single_axis(df, sensor, mod, user, root_dir, f_shape, debug=False):
     df_y = pd.DataFrame(y, columns=["start_time", "sub_id", "mod", "axis",]+["x_{}".format(k) for k in range(f_shape[0]*2)])
     df_z = pd.DataFrame(z, columns=["start_time", "sub_id", "mod", "axis",]+["x_{}".format(k) for k in range(f_shape[0]*2)])
     if not debug:
-        file_name = root_dir + 'mg4_200Hz_sub{}_mod{}_{}_{}_framed.csv'
-        df_x.to_csv(file_name.format(mod=mod, sensor=sensor, axis="x"), index=True)
-        df_y.to_csv(file_name.format(mod=mod, sensor=sensor, axis="y"), index=True)
-        df_z.to_csv(file_name.format(mod=mod, sensor=sensor, axis="z"), index=True)
-        print(">> Success: {} \n".format(file_name.format(user["ID"], mod, sensor, "3AXIS")))
-        
+        df_x.to_csv(file_output.format(mod=mod, sensor=sensor, axis="x"), index=True)
+        df_y.to_csv(file_output.format(mod=mod, sensor=sensor, axis="y"), index=True)
+        df_z.to_csv(file_output.format(mod=mod, sensor=sensor, axis="z"), index=True)
+        print(">> Success:", file_output.format(mod=mod, sensor=sensor, axis="z"), "\n")
 
 """ 
 Main
@@ -111,13 +109,13 @@ def main():
         # file_name = "./dataStore/DownSampled/mg4_200Hz_sub{}_mod{}_{}.csv".format(name["ID"], mod, sensor)
         filename = file_input.format(mod=mod)
         df_HR = pd.read_csv(filename)
-        print(df_HR.head())
+        # print(df_HR.head())
         cols = ["time", "label", "label_id",] + ["{}_{}".format(sensor, axis) for axis in ["x","y","z"]]
         df_HR = df_HR[cols]
         df_HR = df_HR.rename(columns={"{}_{}".format(sensor, axis):"{}".format(axis) for axis in  ["x","y","z"]})
         if not "sub_id" in df_HR.columns: df_HR["sub_id"] = sub_id
         if not "mod"    in df_HR.columns:    df_HR["mod"]    = mod
-        print(df_HR.head())
+        # print(df_HR.head())
         print("Start Framing: {}".format(filename))
         print("df_HR.shape=", df_HR.shape)
         print("f_shape=", f_shape)

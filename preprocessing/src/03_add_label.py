@@ -73,7 +73,7 @@ def label_other(df, label_id, cat, label, start_time, end_time, session=-1):
     return df
 
 
-def add_label(df, df_label, mod, axis, sub_id, sensor, file_output, label_info='None', debug=True):
+def add_label(df, df_label, mod, axis, sub_id, sensor, file_output, f_shape=None, label_info='None', debug=True):
     """ Add label to entire DataFrame
     """
     #
@@ -111,7 +111,6 @@ def main():
     parser = make_parser()
     args = parser.parse_args()
     print("Args:", args)
-    args.func(args)
 
     
     # Params
@@ -154,7 +153,7 @@ def main():
                 df_label_tmp = df_label_tmp.reset_index(drop=True)
             else:
                 df_label_tmp = None
-            add_label(df, df_label_tmp, mod, axis, sub_id, sensor, file_output, label_info=args.label_info, debug=False)
+            add_label(df, df_label_tmp, mod, axis, sub_id, sensor, file_output, f_shape=f_shape, label_info=args.label_info, debug=False)
             print(">> Success")
 
 
