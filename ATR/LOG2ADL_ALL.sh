@@ -1,10 +1,10 @@
-root_dir="2018_01_16"
-date="2018-01-16"
+root_dir="2017_12_15"
+date="2017-12-15"
 
-# # Labeled #1
-# array_id=(01 02 03 04 05 06 07 08)
-# array_name=("kawabe" "higashinaka" "yasuda" "kamiya" "ishiyama" "yoshimura" "aiko" "higashide")
-# N=8
+# Labeled #1
+array_id=(01 02 03 04 05 06 07 08)
+array_name=("kawabe" "higashinaka" "yasuda" "kamiya" "ishiyama" "yoshimura" "aiko" "higashide")
+N=8
 
 
 

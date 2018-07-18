@@ -173,7 +173,7 @@ def write_csv(df, path_output_dir, file_name):
         os.mkdir(path_output_dir)
     # Write
     path_csv = os.path.join(path_output_dir, file_name)
-    df.to_csv(path_csv)
+    df.to_csv(path_csv, index=False)
     print(">> Done: Write csv.[{}]".format(path_csv))
 
 
@@ -232,7 +232,7 @@ def main_mix(args, merge_with_timestamp=False):
     print("Start: Read csv files and label xml data.")
     df_acc = read_csv(args.path_input_root_dir_acc)   # sensor data [Acc CSV]
     df_gyro = read_csv(args.path_input_root_dir_gyro)   # sensor data [Gryro CSV]
-    if add_label == "True":
+    if add_label:
         df_label = read_label_xml(args.path_input_xml)  # label  data [XML]
     else:
         df_label = pd.DataFrame()
@@ -244,7 +244,7 @@ def main_mix(args, merge_with_timestamp=False):
     print(">> Success: Read Data[df_acc={}, df_gyro={}, df_label={}]\n".format(df_acc.shape, df_gyro.shape, df_label.shape))
 
     # Merge sensor data and label data
-    if add_label == "True":
+    if add_label:
         print("Start: Add label to sensor data.")
         df_acc = merge_label(df_acc, df_label)
         print(df_acc.head(10))
@@ -255,7 +255,7 @@ def main_mix(args, merge_with_timestamp=False):
         df_acc["label"], df_acc["label_id"] = "none", -1
 
     # Merge Acc & Gyro
-    print("Start: Add label to sensor data.")
+    print("Start: Merge Acc & Gyro")
     df_gyro["time"] = pd.to_datetime(df_gyro["time"], format="%Y%m%d_%H:%M:%S.%f")
     if merge_with_timestamp:
         df = pd.merge(df_acc, df_gyro, on=["time"], how="left")
@@ -275,7 +275,7 @@ def main_mix(args, merge_with_timestamp=False):
     # Write
     print("Start: Write CSV files")
     write_csv(df, args.path_output_dir, args.filename_csv)
-    if add_label == "True":
+    if add_label and not (args.filename_label == "None"):
         write_labels(df_label, args.path_output_dir, args.filename_label, args.filename_summary)
     print(">> Success\n")
     print("Finish !!\n")

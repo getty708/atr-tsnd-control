@@ -1,6 +1,6 @@
-root_dir="2018_01_16"
-date="2018-01-16"
-prefix="mg4"
+root_dir="2017_12_15"
+date="2017-12-15"
+prefix="mg3"
 
 array_id=(01 02 03 04 05 06 07 08)
 array_name=("kawabe" "higashinaka" "yasuda" "kamiya" "ishiyama" "yoshimyura" "aiko" "higashide")
@@ -18,10 +18,13 @@ do
 	   --path-input-root-dir-gyro  /root/dataStore_upconversion/data/${root_dir}/CSV/ADL/ADL_${sub_id}_${sub_name}/Gyro \
 	   --path-input-xml            /root/dataStore_upconversion/data/${root_dir}/${sub_id}_${sub_name}/data.xml \
 	   --path-output-dir           /root/dataStore_upconversion/data/${root_dir}/CSV/ \
-	   --filename-csv              ${prefix}_1000Hz_sub${sub_id}_mix.csv \
-	   --filename-label            ${prefix}_sub${sub_id}_label_detail.csv \
-	   --filename-summary          ${prefix}_sub${sub_id}_label_summary.csv
+	   --filename-csv              ${prefix}${sub_id}_ags.csv \
+	   --filename-label            None \
+	   --filename-summary          None
+	   # --filename-label            ${prefix}_sub${sub_id}_label_detail.csv \
+	   # --filename-summary          ${prefix}_sub${sub_id}_label_summary.csv
 done
+
 
 
 # # No Label
@@ -38,17 +41,17 @@ done
 #     # Exec
 #     python ./src/adl_to_csv.py MIX \
 # 	   --path-input-root-dir-acc   /root/dataStore_upconversion/data/${root_dir}/${sub_id}_${sub_name}/data/acc2 \
-# 	   --path-input-root-dir-gyro  /root/dataStore_upconversion/data/${root_dir}/CSV/ADL/ADL_${sub_id}_${sub_name}/Gryo \
+# 	   --path-input-root-dir-gyro  /root/dataStore_upconversion/data/${root_dir}/CSV/ADL/ADL_${sub_id}_${sub_name}/Gyro \
 # 	   --path-input-xml            None \
 # 	   --path-output-dir           /root/dataStore_upconversion/data/${root_dir}/CSV/ \
-# 	   --filename-csv              ${prefix}_1000Hz_sub${sub_id}_mix.csv \
+# 	   --filename-csv              ${prefix}${sub_id}_ags.csv \
 # 	   --filename-label            None \
 # 	   --filename-summary          None
 # done
 
 
 
-# # Labeled Data
+# # labeled Data
 # array_id=(30 32 33 35 38 39 44)
 # array_name=("hada" "torisuke" "matsukawa" "hamase" "onuma" "kashiyama" "hukuda")
 # N=7
@@ -65,7 +68,10 @@ done
 # 	   --path-input-root-dir-gyro  /root/dataStore_upconversion/data/${root_dir}/CSV/ADL/ADL_${sub_id}_${sub_name}/Gyro \
 # 	   --path-input-xml            /root/dataStore_upconversion/data/${root_dir}/${sub_id}_${sub_name}/data.xml \
 # 	   --path-output-dir           /root/dataStore_upconversion/data/${root_dir}/CSV/ \
-# 	   --filename-csv              ${prefix}_1000Hz_sub${sub_id}_mix.csv \
-# 	   --filename-label            ${prefix}_sub${sub_id}_label_detail.csv \
-# 	   --filename-summary          ${prefix}_sub${sub_id}_label_summary.csv
+# 	   --filename-csv              ${prefix}${sub_id}_ags.csv \
+# 	   --filename-label            None \
+# 	   --filename-summary          None
+# 	   # --filename-label            ${prefix}_sub${sub_id}_label_detail.csv \
+# 	   # --filename-summary          ${prefix}_sub${sub_id}_label_summary.csv
 # done
+
