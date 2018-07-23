@@ -113,7 +113,11 @@ def add_timestamps(df, base_timestamp):
 
     # MAIN
     df = df.sort_values(by=["time_ATR"], ascending=True).reset_index(drop=True)
+    # print("check 1")
+    print(df.head())
     df["timestamp"] = df["time_ATR"].apply(convert_timestamp) # Convert ADT timestamp to  datatime object
+    # print("check 2")
+    print(df.head())
     df["time"], df["time_milli"] = df["timestamp"].dt.strftime('%Y-%m-%d %H:%M:%S.'), df["timestamp"].dt.microsecond // 1000
     df["time"] = df["time"].astype(str) + df["time_milli"].astype(str).str.zfill(3) # '%Y-%m-%d %H:%M:%S.' + '%fff'
     print(">> Done: df.shape={}".format(df.shape))
@@ -140,6 +144,8 @@ def main():
     # Raed Input file
     print("Start: Read and convert log files to pd.DataFrame")
     df = read_log_file(args.filename_input, args.sensor)
+    assert df.duplicated(["time_ATR"]).all(), "There is some confliction among some time stamps (ATR format)"
+    # df = df.drop_duplicates(["time_ATR"], keep="last").reset_index(drop=True)
     print(df.head())
     print(">> Success\n")
 
