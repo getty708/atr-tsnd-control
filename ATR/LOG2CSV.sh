@@ -1,5 +1,5 @@
-root_dir="2018_07_17"
-date="2018-07-17"
+root_dir="2018_08_03"
+date="2018-08-03"
 prefix="arm"
 
 # Labeled #1
@@ -15,7 +15,7 @@ prefix="arm"
 
 # id_list="01 02 03 04"
 # sensor="geo"
-id_list="04"
+id_list="10 11 12 13 14 15"
 sensor="ags"
 
 
@@ -32,5 +32,4 @@ do
 	   --filename-output  /root/dataStore_upconversion/data/${root_dir}/CSV/${prefix}${id}_${sensor}.csv \
     	   --date             ${date} \
     	   --shift            0.0 
-
 done

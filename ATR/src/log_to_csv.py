@@ -144,7 +144,7 @@ def main():
     # Raed Input file
     print("Start: Read and convert log files to pd.DataFrame")
     df = read_log_file(args.filename_input, args.sensor)
-    assert df.duplicated(["time_ATR"]).all(), "There is some confliction among some time stamps (ATR format)"
+    assert len(df[df.duplicated(["time_ATR"])]) == 0, "There is some confliction among some time stamps (ATR format)"
     # df = df.drop_duplicates(["time_ATR"], keep="last").reset_index(drop=True)
     print(df.head())
     print(">> Success\n")
