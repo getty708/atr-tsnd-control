@@ -1,6 +1,6 @@
-root_dir="2018_08_03"
-date="2018-08-03"
-prefix="arm"
+root_dir="2018_08_04"
+date="2018-08-04"
+prefix="pose"
 
 # Labeled #1
 # id_list="09 10 11 12 13" # 2018.01.16
@@ -15,7 +15,7 @@ prefix="arm"
 
 # id_list="01 02 03 04"
 # sensor="geo"
-id_list="10 11 12 13 14 15"
+id_list="201 202 203"
 sensor="ags"
 
 
