@@ -14,9 +14,9 @@ prefix="pose"
 # id_list="45" # 2018.02.04
 
 # id_list="01 02 03 04"
-# sensor="geo"
+sensor="geo"
 id_list="201 202 203"
-sensor="ags"
+#sensor="ags"
 
 
 
