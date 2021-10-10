@@ -1,24 +1,38 @@
-FROM tensorflow/tensorflow:1.4.0-py3
-MAINTAINER Yoshimura Naoya <yoshimura.napya@outlook.com>
+# == Stage.1: Make requirements.txt by poetry ==
+FROM python:3.8-slim as builder
+WORKDIR /root/src/
+RUN pip install poetry
+COPY pyproject.toml poetry.lock ./
+RUN poetry export -f requirements.txt > requirements.txt
 
-# Emacsのインストール
-RUN apt-get update
-RUN apt-get install emacs24-nox -y
-
-# git
-RUN apt install git -y \
-    && git config --global user.email "yoshimura.naoya@ist.osaka-u.ac.jp" \
-    && git config --global user.name "Yoshimura Naoya" \
-    && git config --global core.editor 'emacs -nw'
-
-
-# 作業ディレクトリ
-RUN mkdir /root/work/
-WORKDIR /root/work/
-
-# 追加python モジュール
-COPY requirements.txt /root
+# == Stage.2: Build Maim Images ==
+FROM tensorflow/tensorflow:2.6.0-jupyter
+ENV DEBIAN_FRONTEND noninteractive
+ENV PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y \
+    git \
+    emacs \
+    tmux \
+    nfs-common \
+    cifs-utils \
+    wget \
+    curl \
+    build-essential \
+    iputils-ping \
+    net-tools \
+    sudo
+RUN apt-get install -y tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+ENV TZ Asia/Tokyo
 RUN pip install --upgrade pip
-RUN pip install -r /root/requirements.txt
 
+# Make working directory
+RUN mkdir /root/atr-tk/
 
+# Install Python Packages
+COPY --from=builder /root/src/requirements.txt .
+RUN echo 'alias python=python3' >> ~/.bashrc
+RUN pip install -r /home/bob/requirements.txt
+
+# Change working directory
+WORKDIR /root/atr-tk/
