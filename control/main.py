@@ -10,14 +10,17 @@ if __name__ == "__main__":
 
 
     # == Setup Device Parameters ==
-    time.sleep(5)
-    # device.init_device()
-    time.sleep(5)
+    # time.sleep(5)
+    # # device.init_device()
+    # time.sleep(5)
     
     # == Recordeing ===
+    time.sleep(5)
+    device.start_recording()
+    time.sleep(20)
+    device.stop_recording()
     # device.start()
-    # device.init_device()
-    # time.sleep(5)
+    time.sleep(5)
 
     # -- End --
     device.terminate()

@@ -188,3 +188,20 @@ class TSND151(object):
         response = self.process_command(cmd)
         print(f"AutoPowerOffTime Setting: {response}")
         time.sleep(1)
+
+    def start_recording(self):
+        print("== Start Recoding ==")
+        
+        # == Start Recording ==
+        cmd = tsndcmd.StartRecording()
+        response = self.process_command(cmd)
+        print(f"Recoding Setting (Start): {response}")
+
+    def stop_recording(self):
+        print("== Stop Recoding ==")
+        
+        # == Stop Recordiang ==
+        cmd = tsndcmd.StopRecording()
+        response = self.process_command(cmd)
+        print(f"Stop Recoding: {response}")
+        
