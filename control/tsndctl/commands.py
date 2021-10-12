@@ -310,3 +310,130 @@ class GetBattMethod(CmdTemplate):
             "record": response[3],
         }
         return data
+
+
+
+class SetAccRange(CmdTemplate):
+    """加速度センサ計測レンジ設定
+    """
+    cmd_code = 0x22
+    response_code = 0x8F
+    translation = {
+        0: "+/-2G",
+        1: "+/-4G",
+        2: "+/-8G",
+        3: "+/-16G",
+    }
+
+    def encode(self, mode):
+        """
+        Args:
+            mode (Literal[0, 1, 2, 3]): 加速度センサの計測レンジを設定
+                0: +/-2G, 1:+/-4G, 2: +/-8G, 3: +/-16G
+        """
+        assert mode in [0, 1, 2, 3]
+        
+        cmd = [CMD_HEADER, self.cmd_code, mode]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = response[2]
+        return data
+
+class GetAccRange(CmdTemplate):
+    """加速度センサ計測レンジ設定取得
+    """
+    cmd_code = 0x23
+    response_code = 0xA3
+    translation = {
+        0: "+/-2G",
+        1: "+/-4G",
+        2: "+/-8G",
+        3: "+/-16G",
+    }
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = {
+            "mode": response[2],
+        }
+        return data
+
+
+
+class GetDeviceStatus(CmdTemplate):
+    """動作状態取得
+    
+    Status Code:
+    * 0: USB 接続中コマンドモード
+    * 1: USB 接続中計測モード
+    * 2: Bluetooth 接続中コマンドモード
+    * 3: Bluetooth 接続中計測モード
+    """
+    cmd_code = 0x3C
+    response_code = 0xBC
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = {
+            "status": response[2],
+        }
+        return data
+
+
+
+class SetAutoPowerOffTime(CmdTemplate):
+    """オートパワーオフ時間設定
+
+    BT 接続待機モード時のオートパワーオフ時間を設定する.
+    """
+    cmd_code = 0x50
+    response_code = 0x8F
+
+    def encode(self, minutes):
+        """
+        Args:
+            minutes (int): オートパワーオフ時間
+                0: オートパワーオフ機能無効, 1-20: オートパワーオフ時間（分）
+        """
+        assert minutes >= 0 and minutes <= 20
+        
+        cmd = [CMD_HEADER, self.cmd_code, minutes]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = response[2]
+        return data
+
+class GetAutoPowerOffTime(CmdTemplate):
+    """オートパワーオフ時間設定取得
+    """
+    cmd_code = 0x51
+    response_code = 0xD1
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = {
+            "minutes": response[2],
+        }
+        return data
+

@@ -243,3 +243,89 @@ def test_GetBattMethod__01(response, send, record):
 
     assert data.get("send") == send
     assert data.get("record") == record
+
+
+
+
+@pytest.mark.parametrize("mode,msg_exp", (
+    (
+        0,
+        bytes([0x9A, 0x22, 0x00, 0xb8]),
+    ),
+))
+def test_SetAccRange__01(mode,msg_exp):
+    print("mode:", mode)
+    
+    cobj = cmd.SetAccRange()
+    msg_out = cobj.encode(mode)
+    print("msg[Expected]:", list(msg_exp))
+    print("msg[Outputs ]:", list(msg_out))
+
+    assert msg_out == msg_exp
+
+@pytest.mark.parametrize("response, mode", (
+    (
+        bytes([0x9A, 0xA3, 0x00, 0x00]),
+        0,
+    ),
+))
+def test_GetAccRange__01(response, mode):
+    cobj = cmd.GetAccRange()
+    data = cobj.decode(response)
+    print("data:", data)
+
+    assert data.get("mode") == mode
+
+
+@pytest.mark.parametrize("response, status", (
+    (
+        bytes([0x9A, 0xBC, 0x00, 0x00]),
+        0,
+    ),
+    (
+        bytes([0x9A, 0xBC, 0x02, 0x00]),
+        2,
+    ),
+    (
+        bytes([0x9A, 0xBC, 0x03, 0x00]),
+        3,
+    ),
+))
+def test_GetDeviceStatus__01(response, status):
+    cobj = cmd.GetDeviceStatus()
+    data = cobj.decode(response)
+    print("data:", data)
+
+    assert data.get("status") == status
+
+
+
+
+@pytest.mark.parametrize("minutes,msg_exp", (
+    (
+        0,
+        bytes([0x9A, 0x50, 0x00, 0xca]),
+    ),
+))
+def test_SetAutoPowerOffTime__01(minutes,msg_exp):
+    print("minutes:", minutes)
+    
+    cobj = cmd.SetAutoPowerOffTime()
+    msg_out = cobj.encode(minutes)
+    print("msg[Expected]:", list(msg_exp))
+    print("msg[Outputs ]:", list(msg_out))
+
+    assert msg_out == msg_exp
+
+@pytest.mark.parametrize("response, minutes", (
+    (
+        bytes([0x9A, 0xD1, 0x00, 0x00]),
+        0,
+    ),
+))
+def test_GetAutoPowerOffTime__01(response, minutes):
+    cobj = cmd.GetAutoPowerOffTime()
+    data = cobj.decode(response)
+    print("data:", data)
+
+    assert data.get("minutes") == minutes
