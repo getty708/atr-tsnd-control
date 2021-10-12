@@ -8,10 +8,16 @@ if __name__ == "__main__":
     device = TSND151(DEVICE_NAME, DEVICE_PORT, timeout=None)
     print("check0-1", device)
 
-    # device.start()
-    time.sleep(5)
-    device.init_device()
+
+    # == Setup Device Parameters ==
     time.sleep(5)
     # device.init_device()
+    time.sleep(5)
+    
+    # == Recordeing ===
+    # device.start()
+    # device.init_device()
     # time.sleep(5)
+
+    # -- End --
     device.terminate()
