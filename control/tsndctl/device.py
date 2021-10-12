@@ -25,13 +25,18 @@ class TSND151(object):
 
         # Setup serial port
         self.ser = serial.Serial(port, baudrate, timeout=timeout)
-        self.thread = threading.Thread(target=self.listen_server)
+        self.thread = threading.Thread(target=self.listen_events)
 
     def start(self):
         self.is_running = True
         self.is_thread_started = True
         self.thread.start()
         
+    def stop(self):
+        if self.is_thread_running:
+            self.thread.join()
+            self.is_thread_running= False
+
     def terminate(self):
         print(f"Teriminate Device[{self.name}]")
         self.is_running = False
@@ -61,12 +66,22 @@ class TSND151(object):
                 break
         return response
 
-    def listen_server(self):
+    def listen_events(self):
+        handler = {
+            0x80: tsndcmd.AgsDataEvent(),
+            0x8F: tsndcmd.StopRecording(), # FIXME: Use dummy decoder.
+        }
+        print(f"check6-2-0: {handler} {self.is_running == False}")
+        
         while True:
             if self.ser.in_waiting > 0:
-                # recv_data = self.ser.read(10)
-                recv_data = self.ser.readline()
-                print(f"Server: Response={recv_data}")
+                response = self.ser.readline()
+                print(f"check6-2-1: {response}")
+                cmd = handler.get(response[1], None) 
+                if cmd is None:
+                    print(f"check6-2-1: Skip")
+                response = cmd.decode(response)
+                print(f"Response[{cmd.response_code}]: {response}")
             if self.is_running == False:
                 break
         print("Stop server")
@@ -103,7 +118,7 @@ class TSND151(object):
         cmd = tsndcmd.SetAgsMethod()
         response = self.process_command(
             cmd,
-            params={"interval": 33, "send_freq": 255, "record_freq": 1},
+            params={"interval": 33, "send_freq": 10, "record_freq": 1},
         )
         print(f"Set Ags Method: {response}")
         time.sleep(1)

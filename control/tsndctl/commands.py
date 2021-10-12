@@ -539,3 +539,48 @@ class GetAutoPowerOffTime(CmdTemplate):
         }
         return data
 
+
+# -------------------------------------------------------------------------------------
+# == Event ==
+
+class AgsDataEvent(CmdTemplate):
+    """加速度角速度計測データ通知
+    
+    Data Field:
+    * TickTime[4Byte] = 計測年月日の 00:00:00:000 からの経過時間(ms 単位)
+    * 加速度データ X [3Byte] = -160000～160000(0.1mg 単位)
+    * 加速度データ Y [3Byte] = -160000～160000(0.1mg 単位)
+    * 加速度データ Z [3Byte] = -160000～160000(0.1mg 単位)
+    * 角速度データ X [3Byte] = -200000～200000(0.01dps 単位)
+    * 角速度データ Y [3Byte] = -200000～200000(0.01dps 単位)
+    * 角速度データ Z [3Byte] = -200000～200000(0.01dps 単位)
+    """
+    cmd_code = None
+    response_code = 0x80
+    response_param_size = 22
+
+    def decode(self, response: bytes) -> dict:
+        assert response[1] == self.response_code
+        
+        # -- Timestamp --
+        print("check9-1", response[2:6])
+        ts = int.from_bytes(response[2:6], "little")
+
+        # -- Sensor Readings --
+        acc = [
+            int.from_bytes(response[6:9], "little"), # Acc-X
+            int.from_bytes(response[9:12], "little"), # Acc-Y
+            int.from_bytes(response[12:15], "little"), # Acc-Z
+        ]
+        gyro = [
+            int.from_bytes(response[15:18], "little"), # Gyro-X
+            int.from_bytes(response[18:21], "little"), # Gyro-Y
+            int.from_bytes(response[21:24], "little"), # Gyro-Z
+        ]
+
+        outputs = {
+            "ts": ts,
+            "acc": acc,
+            "gyro": gyro,
+        }
+        return outputs

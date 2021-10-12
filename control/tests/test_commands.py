@@ -392,3 +392,29 @@ def test_GetAutoPowerOffTime__01(response, minutes):
     print("data:", data)
 
     assert data.get("minutes") == minutes
+
+
+@pytest.mark.parametrize("response,ts,acc,gyro", (
+    (
+        bytes([
+            0x9A, 0x80,
+            0x0B, 0x00, 0x00, 0x00, # ts
+            0x01, 0x00, 0x00, # Acc-X
+            0x02, 0x00, 0x00, # Acc-Y
+            0x03, 0x00, 0x00, # Acc-Z
+            0x04, 0x00, 0x00, # Gyro-X
+            0x05, 0x00, 0x00, # Gyro-Y
+            0x06, 0x00, 0x00, # Gyro-Z
+        ]),
+        11,
+        [1, 2, 3],
+        [4, 5, 6],
+    ),
+))
+def test_AgsDataEvent__01(response, ts, acc, gyro):
+    outputs = cmd.AgsDataEvent().decode(response)
+    print("outputs:", outputs)
+
+    assert outputs["ts"] == ts
+    np.testing.assert_array_equal(outputs["acc"], acc)
+    np.testing.assert_array_equal(outputs["gyro"], gyro)
