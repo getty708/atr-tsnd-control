@@ -21,10 +21,15 @@ class CmdTemplate(object):
     """
     cmd_code: int = None 
     response_code: int = None
+    response_param_size: int = None
     pyload: bytes = None
     
     def __init__(self):
         pass
+
+    @property
+    def response_size(self):
+        return self.response_param_size + 3
 
     def encode(self):
         raise NotImplementedError()
@@ -36,8 +41,12 @@ class CmdTemplate(object):
 class SetDeviceTime(CmdTemplate):
     cmd_code = 0x11
     response_code = 0x8F
+    response_param_size = 1
 
-    def encode(self, ts: datetime.datetime):
+    def encode(self, ts: datetime.datetime=None):
+        if ts is None:
+            ts = datetime.datetime.now()
+
         ms = int(ts.microsecond // 1e3)
         cmd = [
             CMD_HEADER,
@@ -62,6 +71,7 @@ class SetDeviceTime(CmdTemplate):
 class GetDeviceTime(CmdTemplate):
     cmd_code = 0x12
     response_code = 0x92
+    response_param_size = 8
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -74,13 +84,6 @@ class GetDeviceTime(CmdTemplate):
         assert response[1] == self.response_code
         
         # -- Decode --
-        # # year
-        # data = [(response[2] + 2000)]
-        # # month, day, hour, minute, second 
-        # data += list(response[3:8])
-        # # milli second,
-        # data.append(int.from_bytes(response[8:10], 'little'))
-        # ts = datetime.datetime(*data)
         ts = datetime.datetime(
             (response[2] + 2000), # year
             response[3], # month
@@ -98,8 +101,9 @@ class SetAgsMethod(CmdTemplate):
     """
     cmd_code = 0x16
     response_code = 0x8F
+    response_param_size = 1
 
-    def encode(self, interval, send_freq, record_freq):
+    def encode(self, interval=None, send_freq=None, record_freq=None):
         """
         Args:
             interval (int): 計測の実施有無及び計測周期を設定.
@@ -134,6 +138,7 @@ class GetAgsMethod(CmdTemplate):
     """
     cmd_code = 0x17
     response_code = 0x97
+    response_param_size = 3
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -154,8 +159,9 @@ class SetGeoMagneticMethod(CmdTemplate):
     """
     cmd_code = 0x18
     response_code = 0x8F
+    response_param_size = 1
 
-    def encode(self, interval, send_freq, record_freq):
+    def encode(self, interval=None, send_freq=None, record_freq=None):
         """
         Args:
             interval (int): 計測の実施有無及び計測周期を設定.
@@ -189,6 +195,7 @@ class GetGeoMagneticMethod(CmdTemplate):
     """
     cmd_code = 0x19
     response_code = 0x99
+    response_param_size = 3
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -210,8 +217,9 @@ class SetPresMethod(CmdTemplate):
     """
     cmd_code = 0x1A
     response_code = 0x8F
+    response_param_size = 1
 
-    def encode(self, interval, send_freq, record_freq):
+    def encode(self, interval=None, send_freq=None, record_freq=None):
         """
         Args:
             interval (int): 計測の実施有無及び計測周期を設定.
@@ -245,6 +253,7 @@ class GetPresMethod(CmdTemplate):
     """
     cmd_code = 0x1B
     response_code = 0x9B
+    response_param_size = 3
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -266,8 +275,9 @@ class SetBattMethod(CmdTemplate):
     """
     cmd_code = 0x1C
     response_code = 0x8F
+    response_param_size = 1
 
-    def encode(self, send, record):
+    def encode(self, send=None, record=None):
         """
         Args:
             is_send (int): 計測データ送信の実施有無を設定
@@ -297,6 +307,7 @@ class GetBattMethod(CmdTemplate):
     """
     cmd_code = 0x1D
     response_code = 0x9D
+    response_param_size = 2
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -318,6 +329,7 @@ class SetAccRange(CmdTemplate):
     """
     cmd_code = 0x22
     response_code = 0x8F
+    response_param_size = 1
     translation = {
         0: "+/-2G",
         1: "+/-4G",
@@ -325,7 +337,7 @@ class SetAccRange(CmdTemplate):
         3: "+/-16G",
     }
 
-    def encode(self, mode):
+    def encode(self, mode=None):
         """
         Args:
             mode (Literal[0, 1, 2, 3]): 加速度センサの計測レンジを設定
@@ -347,6 +359,7 @@ class GetAccRange(CmdTemplate):
     """
     cmd_code = 0x23
     response_code = 0xA3
+    response_param_size = 1
     translation = {
         0: "+/-2G",
         1: "+/-4G",
@@ -379,6 +392,7 @@ class GetDeviceStatus(CmdTemplate):
     """
     cmd_code = 0x3C
     response_code = 0xBC
+    response_param_size = 1
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -401,12 +415,13 @@ class SetAutoPowerOffTime(CmdTemplate):
     """
     cmd_code = 0x50
     response_code = 0x8F
+    response_param_size = 1
 
     def encode(self, minutes):
         """
         Args:
             minutes (int): オートパワーオフ時間
-                0: オートパワーオフ機能無効, 1-20: オートパワーオフ時間（分）
+                0: オートパワーオフ機能無効, 1-20: オートパワーオフ時間 (分)
         """
         assert minutes >= 0 and minutes <= 20
         
@@ -424,6 +439,7 @@ class GetAutoPowerOffTime(CmdTemplate):
     """
     cmd_code = 0x51
     response_code = 0xD1
+    response_param_size = 1
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]

@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.8,<3.10"
 hydra-core = "^1.1.1"
 numpy = "^1.21.2"
+pyserial = "^3.5"
 
 [tool.poetry.dev-dependencies]
 pysen = {version = "0.9.1", extras = ["lint"]}
