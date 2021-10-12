@@ -47,7 +47,7 @@ def test_GetDeviceTime__encode__01():
 
     assert msg_out == msg_exp
     
-    
+ 
 @pytest.mark.parametrize("response,ts_exp", (
     (
         bytes([0x9A, 0x92, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x8b]),
@@ -68,6 +68,69 @@ def test_GetDeviceTime__decode__01(response,ts_exp):
 
     assert ts_out == ts_exp
     
+@pytest.mark.parametrize("td_start,msg_exp", (
+    (
+        None,
+        bytes([
+            0x9A, 0x13,
+            0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x05,
+            0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+            0x8c,
+        ]),
+    ),
+))
+def test_StartRecording__encode__01(td_start, msg_exp):
+    print("Start Time:", td_start)
+
+    cobj = cmd.StartRecording()
+    msg_out = cobj.encode(mode=0, td_start=td_start)
+    print("msg[Expected]:", msg_exp)
+    print("msg[Outputs ]:", msg_out)
+
+    assert msg_out == msg_exp
+
+@pytest.mark.parametrize("response, status, ts_start, ts_end", (
+    (
+        bytes([
+            0x9A, 0x93,
+            0x01,
+            0x00, 0x01, 0x01, 0x00, 0x00, 0x05,
+            0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+            0x8c,
+        ]),
+        1,
+        datetime.datetime(2000, 1, 1, 0, 0, 5),
+        datetime.datetime(2000, 1, 1, 0, 0, 0),
+    ),
+))
+def test_StartRecording__decode__01(response, status, ts_start, ts_end):
+    cobj = cmd.StartRecording()
+    outputs = cobj.decode(response)
+    print("Outputs:", outputs)
+    
+    assert outputs["status"] == status
+    assert outputs["start"] == ts_start
+    assert outputs["end"] == ts_end
+    
+
+@pytest.mark.parametrize("msg_exp,response, status", (
+    (
+        bytes([0x9A, 0x15, 0x00, 0x8f]),
+        bytes([0x9A, 0x8F, 0x01, 0x00]),
+        1,
+    ),
+))
+def test_StopRecording__01(msg_exp, response, status):
+    # Command 
+    msg_out = cmd.StopRecording().encode()
+    print("msg_out:", msg_out)
+    assert msg_out == msg_exp
+
+    # Response
+    data = cmd.StopRecording().decode(response)
+    print("data:", data)
+
+    assert data["status"] == status
 
 @pytest.mark.parametrize("interval,send_interval,recording_interval,msg_exp", (
     (

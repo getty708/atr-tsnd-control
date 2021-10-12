@@ -1,6 +1,8 @@
 from typing import List
 import datetime
 
+from .utils import get_h_m_s
+
 # Header is a message header byte
 CMD_HEADER: int = 0x9A
 
@@ -95,6 +97,90 @@ class GetDeviceTime(CmdTemplate):
         )
         return ts
 
+
+class StartRecording(CmdTemplate):
+    """計測開始 / 計測予約 (Command) & 計測時刻応答 (Response)
+
+    (Command) 計測の開始または開始時刻及び終了時刻の設定を行う.
+    開始時刻及び終了時刻は, 相対時間または絶対時間の指定が可能.
+
+    (Response) 計測時刻の設定状態と設定された計測の開始時刻及び終了時刻を応答する.
+
+    Note:
+        現状では，開始時刻は相対時間による指定，終了時刻の指定なしのみサポート
+    """
+    cmd_code = 0x13
+    response_code = 0x93
+    response_param_size = 13
+
+    def encode(
+        self,
+        mode:int = 0,
+        td_start: datetime.timedelta=None,
+        td_end: datetime.timedelta=None,
+    ):
+        assert mode == 0
+        assert td_end is None
+        if td_start is None:
+            td_start = datetime.timedelta(seconds=5)
+
+        cmd = [CMD_HEADER, self.cmd_code]
+        
+        # Start Time
+        # NOTE: For mode=0 (relative time mode), year, month, day will be ignored.
+        h, m, s = get_h_m_s(td_start) 
+        cmd += [mode, 0, 1, 1, h, m, s] # mode, year, month, day, hour, minute, second
+        
+        # End Time (free run)
+        # NOTE: For mode=0 (relative time mode), year, month, day will be ignored.
+        cmd += [mode, 0, 1, 1, 0, 0, 0] # mode, year, month, day, hour, minute, second
+        
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        status = response[2]
+
+        ts_start = datetime.datetime(
+            (response[3] + 2000), # year
+            response[4], # month
+            response[5], # day
+            response[6], # hour
+            response[7], # minute
+            response[8], # second
+        )
+        ts_end = datetime.datetime(
+            (response[9] + 2000), # year
+            response[10], # month
+            response[11], # day
+            response[12], # hour
+            response[13], # minute
+            response[14], # second
+        )
+
+        outputs = {
+            "status": status,
+            "start": ts_start,
+            "end": ts_end,
+        }
+        return outputs
+
+
+class StopRecording(CmdTemplate):
+    cmd_code = 0x15
+    response_code = 0x8F
+    response_param_size = 1
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response: bytes) -> dict:
+        assert response[1] == self.response_code        
+        outputs = {"status": response[2]}
+        return outputs
 
 class SetAgsMethod(CmdTemplate):
     """加速/角速度計測設定取得
