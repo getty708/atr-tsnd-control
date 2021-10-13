@@ -21,6 +21,7 @@ def add_bcc(cmd: List[int]):
 class CmdTemplate(object):
     """ Base class for TSDN command  serial communication.
     """
+    name = "none"
     cmd_code: int = None 
     response_code: int = None
     response_param_size: int = None
@@ -36,9 +37,14 @@ class CmdTemplate(object):
     def encode(self):
         raise NotImplementedError()
 
+    def validate_response(self, response: bytes):
+        assert response[1] == self.response_code, f"respose_code={self.response_code}, response={response}"
+
     def decode(self):
         raise NotImplementedError()
     
+    def pformat(self, outputs: dict):
+        return f"{self.name}:: {outputs}"
 
 class SetDeviceTime(CmdTemplate):
     cmd_code = 0x11
@@ -66,7 +72,8 @@ class SetDeviceTime(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -82,9 +89,8 @@ class GetDeviceTime(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response: bytes) -> datetime.datetime:
-        # raise NotImplementedError()
-        assert response[1] == self.response_code
-        
+        self.validate_response(response)
+            
         # -- Decode --
         ts = datetime.datetime(
             (response[2] + 2000), # year
@@ -139,9 +145,9 @@ class StartRecording(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+        
         status = response[2]
-
         ts_start = datetime.datetime(
             (response[3] + 2000), # year
             response[4], # month
@@ -178,7 +184,8 @@ class StopRecording(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response: bytes) -> dict:
-        assert response[1] == self.response_code        
+        self.validate_response(response)
+
         outputs = {"status": response[2]}
         return outputs
 
@@ -214,7 +221,8 @@ class SetAgsMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -232,7 +240,8 @@ class GetAgsMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "interval": response[2],
             "send_freq": response[3],
@@ -272,7 +281,8 @@ class SetGeoMagneticMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -289,7 +299,8 @@ class GetGeoMagneticMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "interval": response[2],
             "send_freq": response[3],
@@ -330,7 +341,8 @@ class SetPresMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -347,7 +359,8 @@ class GetPresMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "interval": response[2],
             "send_freq": response[3],
@@ -384,7 +397,8 @@ class SetBattMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -401,7 +415,8 @@ class GetBattMethod(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "send": response[2],
             "record": response[3],
@@ -436,7 +451,8 @@ class SetAccRange(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -480,7 +496,8 @@ class ClearMemoery(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "status": response[2],
         }
@@ -500,7 +517,8 @@ class GetMemEntryCount(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "num_entry": response[2],
         }
@@ -521,7 +539,8 @@ class GetFreMemSize(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "num_free_entries": response[2],
             "num_free_records": int.from_bytes(response[2:6], "little"),
@@ -548,7 +567,8 @@ class GetDeviceStatus(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "status": response[2],
         }
@@ -578,7 +598,8 @@ class SetAutoPowerOffTime(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = response[2]
         return data
 
@@ -595,7 +616,8 @@ class GetAutoPowerOffTime(CmdTemplate):
         return bytes(cmd)
 
     def decode(self, response):
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         data = {
             "minutes": response[2],
         }
@@ -622,7 +644,7 @@ class AgsDataEvent(CmdTemplate):
     response_param_size = 22
 
     def decode(self, response: bytes) -> dict:
-        assert response[1] == self.response_code
+        self.validate_response(response)
         
         # -- Timestamp --
         ts = int.from_bytes(response[2:6], "little")
@@ -646,18 +668,23 @@ class AgsDataEvent(CmdTemplate):
         }
         return outputs
 
+    def pformat(self, outputs):
+        return f"AgsDataEvent:: {outputs}"
+
 
 class RecodingStartedEvent(CmdTemplate):
     """計測開始通知
     
     計測開始を通知する. 本通知は計測記録メモリの対象としない.
     """
+    name = "RecongingStartedEvent"
     cmd_code = None
     response_code = 0x88
     response_param_size = 1
 
     def decode(self, response: bytes) -> dict:
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         outputs = {
             "recording": "started",
         }
@@ -677,12 +704,14 @@ class RecodingStoppedEvent(CmdTemplate):
     * 100: 開始エラー(同時計測記録可能量オーバー、計測対象無し)
     * 101: 開始エラー(拡張 I2C 異常)
     """
+    name = "RecongingStoppedEvent"
     cmd_code = None
     response_code = 0x89
     response_param_size = 1
 
     def decode(self, response: bytes) -> dict:
-        assert response[1] == self.response_code
+        self.validate_response(response)
+
         outputs = {
             "recording": "stopped",
             "status": response[2],

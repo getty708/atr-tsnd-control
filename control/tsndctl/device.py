@@ -49,14 +49,14 @@ class TSND151(object):
 
         # Setup serial port
         self.ser = serial.Serial(port, baudrate, timeout=timeout)
-        self.thread = threading.Thread(target=self.listen_events)
+        self.thread = threading.Thread(target=self.event_listener)
 
-    def start(self):
+    def start_event_listener(self):
         self.is_running = True
         self.is_thread_started = True
         self.thread.start()
         
-    def stop(self):
+    def stop_event_listener(self):
         self.is_running = False
         time.sleep(self.timeout + 2)
         if self.is_thread_running:
@@ -83,7 +83,7 @@ class TSND151(object):
                 break
         return response
 
-    def listen_events(self):
+    def event_listener(self):
         handler = {
             0x80: tsndcmd.AgsDataEvent(),
             0x88: tsndcmd.RecodingStartedEvent(),
@@ -99,26 +99,26 @@ class TSND151(object):
             if self.ser.in_waiting > 0:
                 response = self.ser.readline()
                 if len(response) == 0:
-                    print(f"Timeout ({response})")
+                    self.logger.warning(f"Timeout ({response})")
                     continue
                 
                 # TODO: (1) Split by \x9a
                 responses = split_response(response)
                 # TODO: (2) decode each segment
                 for i, res in enumerate(responses):
-                    # print(f"check6-2-2[{i}]: {res}")
                     if len(res) < 2:
-                        # print(f"check6-2-3-1: Short Message (response={res})")
+                        self.logger.warning(f"ShortResponseMsg (response={res})")
                         continue
                     cmd = handler.get(res[1], None) 
                     if cmd is None:
-                        # print(f"check6-2-3-2: Skip (response code = {res[1]})")
+                        self.logger.warning(f"Unknown Response (response={res})")
                         continue
                     else:
                         res = cmd.decode(res)
-                        print(f"({i:>3}) Response[{cmd.response_code}]: {res}")
+                        # print(f"({i:>3}) Response[{cmd.response_code}]: {res}")
+                        self.logger.info(cmd.pformat(res))
             
-        print("Stop server")
+        self.logger.info("Stop server")
         
     def process_command(self, cmd: tsndcmd.CmdTemplate, params: dict=None):
         if params is None:
@@ -253,7 +253,7 @@ class TSND151(object):
         self.send(msg)       
         self.logger.info(f"Stop Recoding: {msg}")
 
-    def check_memoery_status(self):
+    def check_memory_status(self):
         self.logger.info("== Check Memory Status ==")
         
         # == Memory Counts ==
