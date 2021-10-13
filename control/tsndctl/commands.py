@@ -540,6 +540,27 @@ class GetMemEntryCount(CmdTemplate):
         }
         return data
 
+class ReadMemData(CmdTemplate):
+    """計測データ記録メモリ読み出し
+    """
+    name = "ReadMemData"
+    cmd_code = 0x39
+    response_code = 0xB9
+    response_param_size = 1
+
+    def encode(self, entry_index):
+        assert entry_index > 0 and entry_index <= 80, f"entry_index={entry_index}"
+
+        cmd = [CMD_HEADER, self.cmd_code, entry_index]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        self.validate_response(response)
+        data = {
+            "status": "done",
+        }
+        return data
 
 class GetFreeMemSize(CmdTemplate):
     """計測データ記録メモリ残容量取得
@@ -641,6 +662,32 @@ class GetAutoPowerOffTime(CmdTemplate):
             "minutes": response[2],
         }
         return data
+
+
+class StopReadMemData(CmdTemplate):
+    """計測データ記録読み出し中断 & 計測データ記録メモリ読み出し完了応答
+    
+    Response=指定されたエントリ番号の計測データが全て送信.もしくは送信中断されたことを示す応答.
+    """
+    name = "StopReadMemData"
+    cmd_code = 0x54
+    response_code = 0xB9
+    response_param_size = 1
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        self.validate_response(response)
+        data = {
+            "status": response[2],
+        }
+        return data
+
+
+
 
 
 # -------------------------------------------------------------------------------------

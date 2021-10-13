@@ -87,11 +87,13 @@ class TSND151(object):
             0x80: tsndcmd.AgsDataEvent(),
             0x88: tsndcmd.RecodingStartedEvent(),
             0x89: tsndcmd.RecodingStoppedEvent(),
+            0xB9: tsndcmd.ReadMemData(),
             0x8F: tsndcmd.StopRecording(), # FIXME: Use dummy decoder.
         }
         pprint(handler)
         
-        while True:
+        server_on = True
+        while server_on:
             if self.is_running == False:
                 break
             if self.ser.in_waiting > 0:
@@ -111,11 +113,15 @@ class TSND151(object):
                     if cmd is None:
                         self.logger.warning(f"Unknown Response (response={res})")
                         continue
+                    elif cmd.name == "ReadMemData":
+                        server_on = False
+                        print("check10", res)
+                        break
                     else:
                         res = cmd.decode(res)
-                        # print(f"({i:>3}) Response[{cmd.response_code}]: {res}")
                         self.logger.info(cmd.pformat(res))
-            
+                if server_on is False:
+                    break
         self.logger.info("Stop server")
         
     def process_command(self, cmd: tsndcmd.CmdTemplate, params: dict=None):
@@ -253,17 +259,24 @@ class TSND151(object):
 
     def check_memory_status(self):
         self.logger.info("== Check Memory Status ==")
+        outputs = dict()
         
         # == Memory Counts ==
         cmd = tsndcmd.GetMemEntryCount()
         response = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
+        outputs.update({
+            "MemEntryCount": response,
+        })
 
         # == Free Memory Size ==
         cmd = tsndcmd.GetFreeMemSize()
         response = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
-
+        outputs.update({
+            "FreeMemorySize": response,
+        })
+        return outputs
 
     def clear_memory(self):
         # == Memory Counts ==
@@ -284,3 +297,34 @@ class TSND151(object):
             self.logger.info(cmd.pformat(response))
         else:
             self.logger.info("Quit")
+
+
+    def read_mem_data(self, entry_index):
+        self.logger.info("== Read Mem Data ==")
+        
+        # Start Read Memoery Data
+        cmd = tsndcmd.ReadMemData()
+        msg = cmd.encode(entry_index)
+        data = {"mode": "start", "entry": entry_index}
+        self.logger.info(f"ReadMemDataCtl:: {data}")
+        self.send(msg)
+
+        # Read and Output to Log File
+        try:
+            self.is_running = True
+            self.event_listener()
+            self.is_running = False
+        except KeyboardInterrupt:
+            self.is_running = False
+            
+            # Send StopReadMemData Command
+            cmd = tsndcmd.StopReadMemData()
+            msg = cmd.encode()
+            data = {"mode": "stop", "entry": entry_index}
+            self.logger.info(f"ReadMemDataCtl:: {data}")
+            self.send(msg)
+
+        # Finish Read Out the Entry
+        data = {"mode": "end", "entry": entry_index}
+        self.logger.info(f"ReadMemDataCtl:: {data}")
+        

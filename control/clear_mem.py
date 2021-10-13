@@ -1,4 +1,4 @@
-""" Clear Memory.
+""" Clear Memory
 """
 from tsndctl.device import TSND151
 import time
