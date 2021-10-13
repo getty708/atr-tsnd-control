@@ -6,7 +6,38 @@
 
 ## Usage
 
-TBA
+### Initialize Sensor Status 
+
+Include clock sync.
+
+```bash
+python init_sensor.py client=<client>
+```
+
+client choices:
+
+- atr01 (macOS)
+- atr02 (macOS)
+- atr01-win (windows)
+- atr02-win (windows)
+
+### Recoding
+
+```bash
+python recording.py client=<client>
+```
+
+### Clear Memory
+
+```bash
+python clear_mem.py client=<client>
+```
+
+### Download Recorded Data
+
+```bash
+python download.py client=<client>
+```
 
 ## Supported Command
 
