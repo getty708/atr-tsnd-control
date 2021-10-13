@@ -2,6 +2,7 @@ import datetime
 import sys
 import pytest
 import numpy as np
+from control.tsndctl.commands import RecodingStartedEvent
 sys.path.append("../")
 
 from tsndctl import commands as cmd
@@ -418,3 +419,10 @@ def test_AgsDataEvent__01(response, ts, acc, gyro):
     assert outputs["ts"] == ts
     np.testing.assert_array_equal(outputs["acc"], acc)
     np.testing.assert_array_equal(outputs["gyro"], gyro)
+
+
+def test_RecodingStartedEvent__01(response):
+    raise NotImplementedError()
+
+def test_RecodingStoppedEvent__01(response):
+    raise NotImplementedError()

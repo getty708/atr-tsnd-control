@@ -563,24 +563,66 @@ class AgsDataEvent(CmdTemplate):
         assert response[1] == self.response_code
         
         # -- Timestamp --
-        print("check9-1", response[2:6])
         ts = int.from_bytes(response[2:6], "little")
 
         # -- Sensor Readings --
         acc = [
-            int.from_bytes(response[6:9], "little"), # Acc-X
-            int.from_bytes(response[9:12], "little"), # Acc-Y
-            int.from_bytes(response[12:15], "little"), # Acc-Z
+            int.from_bytes(response[6:9], "little", signed=True), # Acc-X
+            int.from_bytes(response[9:12], "little", signed=True), # Acc-Y
+            int.from_bytes(response[12:15], "little", signed=True), # Acc-Z
         ]
         gyro = [
-            int.from_bytes(response[15:18], "little"), # Gyro-X
-            int.from_bytes(response[18:21], "little"), # Gyro-Y
-            int.from_bytes(response[21:24], "little"), # Gyro-Z
+            int.from_bytes(response[15:18], "little", signed=True), # Gyro-X
+            int.from_bytes(response[18:21], "little", signed=True), # Gyro-Y
+            int.from_bytes(response[21:24], "little", signed=True), # Gyro-Z
         ]
 
         outputs = {
             "ts": ts,
             "acc": acc,
             "gyro": gyro,
+        }
+        return outputs
+
+
+class RecodingStartedEvent(CmdTemplate):
+    """計測開始通知
+    
+    計測開始を通知する. 本通知は計測記録メモリの対象としない.
+    """
+    cmd_code = None
+    response_code = 0x88
+    response_param_size = 1
+
+    def decode(self, response: bytes) -> dict:
+        assert response[1] == self.response_code
+        outputs = {
+            "recording": "started",
+        }
+        return outputs
+
+
+class RecodingStoppedEvent(CmdTemplate):
+    """計測終了通知
+
+    計測が終了したことを通知する. 本通知は計測記録メモリの対象としない.
+
+    計測終了ステータス:
+    * 0: 計測停止コマンド及び終了時刻による終了
+    * 1: OptionSW 操作による終了
+    * 2: 計測記録メモリフル終了
+    * 3: バッテリ残量低下による終了
+    * 100: 開始エラー(同時計測記録可能量オーバー、計測対象無し)
+    * 101: 開始エラー(拡張 I2C 異常)
+    """
+    cmd_code = None
+    response_code = 0x89
+    response_param_size = 1
+
+    def decode(self, response: bytes) -> dict:
+        assert response[1] == self.response_code
+        outputs = {
+            "recording": "stopped",
+            "status": response[2],
         }
         return outputs

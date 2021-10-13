@@ -1,10 +1,27 @@
+from ctypes import resize
 from datetime import datetime
 import time
 import serial
 # import struct
 import threading
+from pprint import pprint
 
 from . import commands as tsndcmd
+
+
+def split_response(res):
+    """
+    Note:
+        Implement unit-test
+    """
+    res_out = []
+    ind_head = 0
+    for i in range(len(res)):
+        if res[i] == 0x9a and i > 0:
+            res_out.append(res[ind_head:i])
+            ind_head = i
+    return res_out
+
 
 class TSND151(object):
     def __init__(
@@ -13,15 +30,17 @@ class TSND151(object):
         port: str=None,
         logdir: str=None,
         baudrate: int =9600,
-        timeout: float=None,
+        timeout: float=5,
         conf: dict=None,
     ) -> None:
         self.name = name
         self.port = port
         self.logdir = logdir
         self.conf = conf
+        self.timeout = timeout
         self.is_running = False
         self.is_thread_running = False
+        assert timeout is not None
 
         # Setup serial port
         self.ser = serial.Serial(port, baudrate, timeout=timeout)
@@ -33,6 +52,8 @@ class TSND151(object):
         self.thread.start()
         
     def stop(self):
+        self.is_running = False
+        time.sleep(self.timeout + 2)
         if self.is_thread_running:
             self.thread.join()
             self.is_thread_running= False
@@ -40,9 +61,9 @@ class TSND151(object):
     def terminate(self):
         print(f"Teriminate Device[{self.name}]")
         self.is_running = False
-        if self.is_thread_running:
-            self.thread.join()
-            self.is_thread_running= False
+        # if self.is_thread_running:
+        #     self.thread.join()
+        #     self.is_thread_running= False
         self.ser.close()
 
 
@@ -69,21 +90,38 @@ class TSND151(object):
     def listen_events(self):
         handler = {
             0x80: tsndcmd.AgsDataEvent(),
+            0x88: tsndcmd.RecodingStartedEvent(),
+            0x89: tsndcmd.RecodingStoppedEvent(),
             0x8F: tsndcmd.StopRecording(), # FIXME: Use dummy decoder.
         }
-        print(f"check6-2-0: {handler} {self.is_running == False}")
+        print(f"check6-2-0: {self.is_running}")
+        print(handler)
         
         while True:
-            if self.ser.in_waiting > 0:
-                response = self.ser.readline()
-                print(f"check6-2-1: {response}")
-                cmd = handler.get(response[1], None) 
-                if cmd is None:
-                    print(f"check6-2-1: Skip")
-                response = cmd.decode(response)
-                print(f"Response[{cmd.response_code}]: {response}")
             if self.is_running == False:
                 break
+            if self.ser.in_waiting > 0:
+                response = self.ser.readline()
+                if len(response) == 0:
+                    print(f"Timeout ({response})")
+                    continue
+                
+                # TODO: (1) Split by \x9a
+                responses = split_response(response)
+                # TODO: (2) decode each segment
+                for i, res in enumerate(responses):
+                    # print(f"check6-2-2[{i}]: {res}")
+                    if len(res) < 2:
+                        # print(f"check6-2-3-1: Short Message (response={res})")
+                        continue
+                    cmd = handler.get(res[1], None) 
+                    if cmd is None:
+                        # print(f"check6-2-3-2: Skip (response code = {res[1]})")
+                        continue
+                    else:
+                        res = cmd.decode(res)
+                        print(f"({i:>3}) Response[{cmd.response_code}]: {res}")
+            
         print("Stop server")
         
     def process_command(self, cmd: tsndcmd.CmdTemplate, params: dict=None):
@@ -217,6 +255,7 @@ class TSND151(object):
         
         # == Stop Recordiang ==
         cmd = tsndcmd.StopRecording()
-        response = self.process_command(cmd)
-        print(f"Stop Recoding: {response}")
+        msg = cmd.encode()
+        self.send(msg)       
+        print(f"Stop Recoding: {msg}")
         
