@@ -259,3 +259,39 @@ class TSND151(object):
         self.send(msg)       
         print(f"Stop Recoding: {msg}")
         
+
+    def check_memoery_status(self):
+        print("== Check Memory Status ==")
+        
+        # == Memory Counts ==
+        cmd = tsndcmd.GetMemEntryCount()
+        response = self.process_command(cmd)
+        print(f"Memory Count: {response}")
+
+        # == Free Memory Size ==
+        cmd = tsndcmd.GetFreMemSize()
+        response = self.process_command(cmd)
+        print(f"Free Memory Size: {response}")
+
+
+    def clear_memory(self):
+        print("== Check Memory Status ==")
+        # == Memory Counts ==
+        cmd = tsndcmd.GetMemEntryCount()
+        response = self.process_command(cmd)
+        print(f"Memory Count: {response}")
+
+        print("Do you really want to clear memory? [Y/n] >>")
+        res = input()
+        if res == "Y":
+            # == Clear Memory ==
+            cmd = tsndcmd.ClearMemoery()
+            response = self.process_command(cmd)
+            print(f"Clear Memory: {response}")
+
+            # == Memory Counts ==
+            cmd = tsndcmd.GetMemEntryCount()
+            response = self.process_command(cmd)
+            print(f"Memory Count: {response}")
+        else:
+            print("Quit.")

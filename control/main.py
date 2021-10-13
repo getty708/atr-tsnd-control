@@ -17,16 +17,23 @@ if __name__ == "__main__":
     # time.sleep(5)
     
     # # == Recordeing ===
+    # time.sleep(5)
+    # device.check_memoery_status()
+    # device.start_recording()
+    # device.start()
+    # time.sleep(5)
+    # print(">> Recording Started??")
+    # time.sleep(30)
+    # print(">> Stop Recording")
+    # device.stop()
+    # device.stop_recording()
+    # time.sleep(5)
+    # device.check_memoery_status()
+    
+    # == Clear Memory ==
     time.sleep(5)
-    device.start_recording()
-    device.start()
+    device.clear_memory()
     time.sleep(5)
-    print(">> Recording Started??")
-    time.sleep(30)
-    print(">> Stop Recording")
-    device.stop()
-    device.stop_recording()
-    time.sleep(5)
-
+    
     # -- End --
     device.terminate()

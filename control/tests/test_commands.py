@@ -2,7 +2,7 @@ import datetime
 import sys
 import pytest
 import numpy as np
-from control.tsndctl.commands import RecodingStartedEvent
+from control.tsndctl.commands import GetMemEntryCount, RecodingStartedEvent
 sys.path.append("../")
 
 from tsndctl import commands as cmd
@@ -340,6 +340,15 @@ def test_GetAccRange__01(response, mode):
 
     assert data.get("mode") == mode
 
+
+def test_ClearMemory__01(response):
+    raise NotImplementedError()
+
+def test_GetMemEntryCount__01(response):
+    raise NotImplementedError()
+
+def test_GetFreeMemSize__01(response):
+    raise NotImplementedError()
 
 @pytest.mark.parametrize("response, status", (
     (

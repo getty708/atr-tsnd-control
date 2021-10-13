@@ -467,6 +467,68 @@ class GetAccRange(CmdTemplate):
 
 
 
+class ClearMemoery(CmdTemplate):
+    """計測データ記録クリア
+    """
+    cmd_code = 0x35
+    response_code = 0x8F
+    response_param_size = 1
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = {
+            "status": response[2],
+        }
+        return data
+
+class GetMemEntryCount(CmdTemplate):
+    """計測データ記録エントリ件数取得
+    
+    """
+    cmd_code = 0x36
+    response_code = 0xB6
+    response_param_size = 1
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = {
+            "num_entry": response[2],
+        }
+        return data
+
+
+class GetFreMemSize(CmdTemplate):
+    """計測データ記録メモリ残容量取得
+    
+    """
+    cmd_code = 0x3A
+    response_code = 0xBA
+    response_param_size = 5
+
+    def encode(self):
+        cmd = [CMD_HEADER, self.cmd_code, 0x00]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        assert response[1] == self.response_code
+        data = {
+            "num_free_entries": response[2],
+            "num_free_records": int.from_bytes(response[2:6], "little"),
+        }
+        return data
+
+
 class GetDeviceStatus(CmdTemplate):
     """動作状態取得
     
