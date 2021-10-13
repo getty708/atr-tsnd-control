@@ -2,12 +2,11 @@ from ctypes import resize
 from datetime import datetime
 import time
 import serial
-# import struct
 import threading
 from pprint import pprint
 
 from . import commands as tsndcmd
-from .logging import setup_logger
+from logging import getLogger
 
 
 def split_response(res):
@@ -45,7 +44,7 @@ class TSND151(object):
         self.logger = None
         assert timeout is not None
         if self.logger is None:
-            self.logger = setup_logger(self.name)
+            self.logger = getLogger(f"tsndctl.TSND151.{self.name}")
 
         # Setup serial port
         self.ser = serial.Serial(port, baudrate, timeout=timeout)
@@ -58,7 +57,7 @@ class TSND151(object):
         
     def stop_event_listener(self):
         self.is_running = False
-        time.sleep(self.timeout + 2)
+        time.sleep(self.timeout * 2)
         if self.is_thread_running:
             self.thread.join()
             self.is_thread_running= False
@@ -90,8 +89,7 @@ class TSND151(object):
             0x89: tsndcmd.RecodingStoppedEvent(),
             0x8F: tsndcmd.StopRecording(), # FIXME: Use dummy decoder.
         }
-        print(f"check6-2-0: {self.is_running}")
-        print(handler)
+        pprint(handler)
         
         while True:
             if self.is_running == False:
@@ -137,13 +135,13 @@ class TSND151(object):
         # == Send Device Time ==
         cmd = tsndcmd.SetDeviceTime()
         response = self.process_command(cmd)
-        self.logger.debug(f"Set Device Time: status={response}")
+        self.logger.debug(cmd.pformat(response))
         time.sleep(1)
         
         # == Get Device Time ==
         cmd = tsndcmd.GetDeviceTime()
         response = self.process_command(cmd)
-        self.logger.info(f"Device Time: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Ags Method ==
@@ -152,13 +150,13 @@ class TSND151(object):
             cmd,
             params={"interval": 33, "send_freq": 10, "record_freq": 1},
         )
-        self.logger.debug(f"Set Ags Method: {response}")
+        self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Ags Method ==
         cmd = tsndcmd.GetAgsMethod()
         response = self.process_command(cmd)
-        self.logger.debug(f"Ags Method: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set GeoMagnetic Method ==
@@ -167,13 +165,13 @@ class TSND151(object):
             cmd,
             params={"interval": 0, "send_freq": 0, "record_freq": 0},
         )
-        self.logger.debug(f"Set GeoMagnetic Method: {response}")
+        self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get GeoMagnetic Method ==
         cmd = tsndcmd.GetGeoMagneticMethod()
         response = self.process_command(cmd)
-        self.logger.info(f"GeoMagnetic Method: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Pressure Method ==
@@ -182,13 +180,13 @@ class TSND151(object):
             cmd,
             params={"interval": 0, "send_freq": 0, "record_freq": 0},
         )
-        self.logger.debug(f"Set Pressure Method: {response}")
+        self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Pressure Method ==
         cmd = tsndcmd.GetPresMethod()
         response = self.process_command(cmd)
-        self.logger.info(f"Pressure Method: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Battery Method ==
@@ -197,43 +195,43 @@ class TSND151(object):
             cmd,
             params={"send": 0, "record": 0},
         )
-        self.logger.debug(f"Set Battery Method: {response}")
+        self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Battery Method ==
         cmd = tsndcmd.GetBattMethod()
         response = self.process_command(cmd)
-        self.logger.info(f"Battery Method: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Acc Range ==
         cmd = tsndcmd.SetAccRange()
         response = self.process_command(cmd, params={"mode": 1})
-        self.logger.debug(f"Set Acc Range: {response}")
+        self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # == Get Battery Method ==
+        # == Get Acc Range ==
         cmd = tsndcmd.GetAccRange()
         response = self.process_command(cmd)
-        self.logger.info(f"Battery Method: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Device Status ==
         cmd = tsndcmd.GetDeviceStatus()
         response = self.process_command(cmd)
-        self.logger.info(f"Device Status: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
         
         # == Set Auto-power-off Setting ==
         cmd = tsndcmd.SetAutoPowerOffTime()
         response = self.process_command(cmd, params={"minutes": 0})
-        self.logger.debug(f"Set AutoPowerOffTime Setting: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Auto-power-off Setting ==
         cmd = tsndcmd.GetAutoPowerOffTime()
         response = self.process_command(cmd)
-        self.logger.info(f"AutoPowerOffTime Setting: {response}")
+        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
     def start_recording(self):
@@ -242,7 +240,7 @@ class TSND151(object):
         # == Start Recording ==
         cmd = tsndcmd.StartRecording()
         response = self.process_command(cmd)
-        self.logger.info(f"Recoding Setting (Start): {response}")
+        self.logger.info(cmd.pformat(response))
 
     def stop_recording(self):
         self.logger.info("== Stop Recoding ==")
@@ -251,7 +249,7 @@ class TSND151(object):
         cmd = tsndcmd.StopRecording()
         msg = cmd.encode()
         self.send(msg)       
-        self.logger.info(f"Stop Recoding: {msg}")
+        self.logger.info(f"Stop Recoding ({msg})")
 
     def check_memory_status(self):
         self.logger.info("== Check Memory Status ==")
@@ -259,32 +257,30 @@ class TSND151(object):
         # == Memory Counts ==
         cmd = tsndcmd.GetMemEntryCount()
         response = self.process_command(cmd)
-        self.logger.info(f"Memory Count: {response}")
+        self.logger.info(cmd.pformat(response))
 
         # == Free Memory Size ==
-        cmd = tsndcmd.GetFreMemSize()
+        cmd = tsndcmd.GetFreeMemSize()
         response = self.process_command(cmd)
-        self.logger.info(f"Free Memory Size: {response}")
+        self.logger.info(cmd.pformat(response))
 
 
     def clear_memory(self):
-        self.logger.info("== Check Memory Status ==")
         # == Memory Counts ==
-        cmd = tsndcmd.GetMemEntryCount()
-        response = self.process_command(cmd)
-        self.logger.info(f"Memory Count: {response}")
+        self.check_memory_status()
 
+        self.logger.info("== Check Memory Status ==")
         print("Do you really want to clear memory? [Y/n] >>")
         res = input()
         if res == "Y":
             # == Clear Memory ==
             cmd = tsndcmd.ClearMemoery()
             response = self.process_command(cmd)
-            self.logger.info(f"Clear Memory: {response}")
+            self.logger.info(cmd.pformat(response))
 
             # == Memory Counts ==
             cmd = tsndcmd.GetMemEntryCount()
             response = self.process_command(cmd)
-            self.logger.info(f"Memory Count: {response}")
+            self.logger.info(cmd.pformat(response))
         else:
-            self.logger.info("Quit.")
+            self.logger.info("Quit")

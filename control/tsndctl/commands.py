@@ -47,6 +47,7 @@ class CmdTemplate(object):
         return f"{self.name}:: {outputs}"
 
 class SetDeviceTime(CmdTemplate):
+    name = "SetDeviceTime"
     cmd_code = 0x11
     response_code = 0x8F
     response_param_size = 1
@@ -73,11 +74,11 @@ class SetDeviceTime(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {"status": response[2]}
         return data
 
 class GetDeviceTime(CmdTemplate):
+    name = "DeviceTime"
     cmd_code = 0x12
     response_code = 0x92
     response_param_size = 8
@@ -101,7 +102,8 @@ class GetDeviceTime(CmdTemplate):
             second=response[7],
             microsecond=(int.from_bytes(response[8:10], "little") * 1000),
         )
-        return ts
+        data = {"time": ts}
+        return data
 
 
 class StartRecording(CmdTemplate):
@@ -115,6 +117,7 @@ class StartRecording(CmdTemplate):
     Note:
         現状では，開始時刻は相対時間による指定，終了時刻の指定なしのみサポート
     """
+    name = "StartRecording"
     cmd_code = 0x13
     response_code = 0x93
     response_param_size = 13
@@ -174,6 +177,7 @@ class StartRecording(CmdTemplate):
 
 
 class StopRecording(CmdTemplate):
+    name = "StopRecording"
     cmd_code = 0x15
     response_code = 0x8F
     response_param_size = 1
@@ -192,6 +196,7 @@ class StopRecording(CmdTemplate):
 class SetAgsMethod(CmdTemplate):
     """加速/角速度計測設定取得
     """
+    name = "SetAgsMethod"
     cmd_code = 0x16
     response_code = 0x8F
     response_param_size = 1
@@ -230,6 +235,7 @@ class SetAgsMethod(CmdTemplate):
 class GetAgsMethod(CmdTemplate):
     """加速/角速度計測設定
     """
+    name = "AgsMethod"
     cmd_code = 0x17
     response_code = 0x97
     response_param_size = 3
@@ -252,6 +258,7 @@ class GetAgsMethod(CmdTemplate):
 class SetGeoMagneticMethod(CmdTemplate):
     """地磁気計測設定
     """
+    name = "SetGeoMagneticMethod"
     cmd_code = 0x18
     response_code = 0x8F
     response_param_size = 1
@@ -289,6 +296,7 @@ class SetGeoMagneticMethod(CmdTemplate):
 class GetGeoMagneticMethod(CmdTemplate):
     """地磁気計測設定取得
     """
+    name = "GeoMagneticMethod"
     cmd_code = 0x19
     response_code = 0x99
     response_param_size = 3
@@ -312,6 +320,7 @@ class GetGeoMagneticMethod(CmdTemplate):
 class SetPresMethod(CmdTemplate):
     """気圧計測設定
     """
+    name = "SetPresMethod"
     cmd_code = 0x1A
     response_code = 0x8F
     response_param_size = 1
@@ -349,6 +358,7 @@ class SetPresMethod(CmdTemplate):
 class GetPresMethod(CmdTemplate):
     """地磁気計測設定取得
     """
+    name = "PresMethod"
     cmd_code = 0x1B
     response_code = 0x9B
     response_param_size = 3
@@ -372,6 +382,7 @@ class GetPresMethod(CmdTemplate):
 class SetBattMethod(CmdTemplate):
     """バッテリ電圧計測設定
     """
+    name = "SetBattMethod"
     cmd_code = 0x1C
     response_code = 0x8F
     response_param_size = 1
@@ -405,6 +416,7 @@ class SetBattMethod(CmdTemplate):
 class GetBattMethod(CmdTemplate):
     """バッテリ電圧計測設定取得
     """
+    name = "BattMethod"
     cmd_code = 0x1D
     response_code = 0x9D
     response_param_size = 2
@@ -428,6 +440,7 @@ class GetBattMethod(CmdTemplate):
 class SetAccRange(CmdTemplate):
     """加速度センサ計測レンジ設定
     """
+    name = "SetAccRange"
     cmd_code = 0x22
     response_code = 0x8F
     response_param_size = 1
@@ -459,6 +472,7 @@ class SetAccRange(CmdTemplate):
 class GetAccRange(CmdTemplate):
     """加速度センサ計測レンジ設定取得
     """
+    name = "AccRange"
     cmd_code = 0x23
     response_code = 0xA3
     response_param_size = 1
@@ -486,6 +500,7 @@ class GetAccRange(CmdTemplate):
 class ClearMemoery(CmdTemplate):
     """計測データ記録クリア
     """
+    name = "ClearMemory"
     cmd_code = 0x35
     response_code = 0x8F
     response_param_size = 1
@@ -507,6 +522,7 @@ class GetMemEntryCount(CmdTemplate):
     """計測データ記録エントリ件数取得
     
     """
+    name = "MemEntryCount"
     cmd_code = 0x36
     response_code = 0xB6
     response_param_size = 1
@@ -525,10 +541,10 @@ class GetMemEntryCount(CmdTemplate):
         return data
 
 
-class GetFreMemSize(CmdTemplate):
+class GetFreeMemSize(CmdTemplate):
     """計測データ記録メモリ残容量取得
-    
     """
+    name = "FreeMemSize"
     cmd_code = 0x3A
     response_code = 0xBA
     response_param_size = 5
@@ -557,6 +573,7 @@ class GetDeviceStatus(CmdTemplate):
     * 2: Bluetooth 接続中コマンドモード
     * 3: Bluetooth 接続中計測モード
     """
+    name = "DeviceStatus"
     cmd_code = 0x3C
     response_code = 0xBC
     response_param_size = 1
@@ -581,6 +598,7 @@ class SetAutoPowerOffTime(CmdTemplate):
 
     BT 接続待機モード時のオートパワーオフ時間を設定する.
     """
+    name = "SetAutoPowerOffTime"
     cmd_code = 0x50
     response_code = 0x8F
     response_param_size = 1
@@ -606,6 +624,7 @@ class SetAutoPowerOffTime(CmdTemplate):
 class GetAutoPowerOffTime(CmdTemplate):
     """オートパワーオフ時間設定取得
     """
+    name = "AutoPowerOffTime"
     cmd_code = 0x51
     response_code = 0xD1
     response_param_size = 1
@@ -639,6 +658,7 @@ class AgsDataEvent(CmdTemplate):
     * 角速度データ Y [3Byte] = -200000～200000(0.01dps 単位)
     * 角速度データ Z [3Byte] = -200000～200000(0.01dps 単位)
     """
+    name = "AgsDataEvent"
     cmd_code = None
     response_code = 0x80
     response_param_size = 22
@@ -667,10 +687,6 @@ class AgsDataEvent(CmdTemplate):
             "gyro": gyro,
         }
         return outputs
-
-    def pformat(self, outputs):
-        return f"AgsDataEvent:: {outputs}"
-
 
 class RecodingStartedEvent(CmdTemplate):
     """計測開始通知

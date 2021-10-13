@@ -1,6 +1,10 @@
 defaults:
   - client: atr01
-  # - override hydra/job_logging: custom
-  # - override hydra/hydra_logging: disabled
   - _self_ 
+hydra:
+  run:
+    dir: ./outputs/${client.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  job_logging:
+    root:
+      level: DEBUG
 timeout: 5
