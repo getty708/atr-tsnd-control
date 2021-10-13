@@ -1,4 +1,5 @@
 from tsndctl.device import TSND151
+from tsndctl.logging import setup_logger
 import time
 
 DEVICE_NAME = "ATR-01"

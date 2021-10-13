@@ -1,0 +1,6 @@
+defaults:
+  - client: atr01
+  - override hydra/job_logging: custom
+  - override hydra/hydra_logging: disabled
+  - _self_ 
+timeout: 5
