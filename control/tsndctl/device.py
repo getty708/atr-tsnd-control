@@ -154,7 +154,7 @@ class TSND151(object):
         cmd = tsndcmd.SetAgsMethod()
         response = self.process_command(
             cmd,
-            params={"interval": 33, "send_freq": 10, "record_freq": 1},
+            params={"interval": 33, "send_freq": 30, "record_freq": 1},
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
@@ -316,7 +316,7 @@ class TSND151(object):
             self.is_running = False
         except KeyboardInterrupt:
             self.is_running = False
-            
+
             # Send StopReadMemData Command
             cmd = tsndcmd.StopReadMemData()
             msg = cmd.encode()
