@@ -109,13 +109,16 @@ class TSND151(object):
                     if len(res) < 2:
                         self.logger.warning(f"ShortResponseMsg (response={res})")
                         continue
+                    if res[0] != 0x9a:
+                        self.logger.warning(f"BrokenResponseMsg (response={res})")
+                        continue
                     cmd = handler.get(res[1], None) 
                     if cmd is None:
                         self.logger.warning(f"Unknown Response (response={res})")
                         continue
                     elif cmd.name == "ReadMemData":
                         server_on = False
-                        print("check10", res)
+                        self.logger.warning(f"ReadMemDataResponse is detected! (response={res})")
                         break
                     else:
                         res = cmd.decode(res)
