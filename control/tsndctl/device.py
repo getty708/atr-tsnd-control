@@ -301,6 +301,22 @@ class TSND151(object):
         else:
             self.logger.info("Quit")
 
+    def check_entry_details(self, entry_index):
+        self.logger.info("== Check Entry Info ==")
+        
+        # == Check Entry Count ==
+        outputs = self.check_memory_status()
+        time.sleep(5)
+        num_entry = outputs["MemEntryCount"]["num_entry"]
+        
+        # -- Download --
+        # client.start_recording()
+        for i in range(num_entry):
+            cmd = tsndcmd.GetEntryInfo()
+            response = self.process_command(cmd)
+            self.logger.info(cmd.pformat(response))
+            time.sleep(1)
+
 
     def read_mem_data(self, entry_index):
         self.logger.info("== Read Mem Data ==")

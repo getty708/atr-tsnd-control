@@ -540,6 +540,53 @@ class GetMemEntryCount(CmdTemplate):
         }
         return data
 
+class GetEntryInfo(CmdTemplate):
+    """計測データ記録エントリ取得
+    """
+    name = "EntryInfo"
+    cmd_code = 0x37
+    response_code = 0xB7
+    response_param_size = 24
+
+    def encode(self, entry_index: int=None):
+        assert entry_index > 0 and entry_index <= 80
+
+        cmd = [CMD_HEADER, self.cmd_code, entry_index]
+        cmd = add_bcc(cmd)
+        return bytes(cmd)
+
+    def decode(self, response):
+        self.validate_response(response)
+
+        ts_start = datetime.datetime(
+            (response[2] + 2000), # year
+            response[3], # month
+            response[4], # day
+            hour=response[5], # hour
+            minute=response[6], # minute
+            second=response[7], # second
+            microsecond=(int.from_bytes(response[8:10], "little") * 1000),
+        )
+        
+        data = {
+            "ts_start": ts_start, 
+            "num_entry": response[2],
+            "num_records":int.from_bytes(response[10:14], "little"),
+            "ags_freq": response[14],
+            "geo_freq": response[15],
+            "pres_freq": response[16],
+            "ext_freq": response[17],
+            "i2c_freq": response[18],
+            "ags_record_freq": response[19],
+            "geo_record_freq": response[20],
+            "pres_record_freq": response[21],
+            "batt_record_freq": response[22],
+            "ext_record_freq": response[23],
+            "i2c_record_freq": response[24],
+            "edge_event": response[25],
+        }
+        return data
+
 class ReadMemData(CmdTemplate):
     """計測データ記録メモリ読み出し
     """
