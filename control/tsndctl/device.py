@@ -242,6 +242,86 @@ class TSND151(object):
         )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
+        
+        # == Set/Get ExtInput Setting ==
+        # Set
+        cmd = tsndcmd.SetExtInputSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0, "edge_send": 0, "edge_record": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetExtInputSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Set/Get I2C Setting ==
+        # Set
+        cmd = tsndcmd.SetI2CSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetI2CSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Set/Get Quaternion Recoring Setting ==
+        # Set
+        cmd = tsndcmd.SetQuaternionSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetQuaternionSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Set/Get Ext 16bit AD Recoring Setting ==
+        # Set
+        cmd = tsndcmd.SetExt16ADSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0, "mode_ch1": 0, "mode_ch2": 0, "mode_ch3": 0, "mode_ch4": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetExt16ADSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
 
         # == Set Acc Range ==
         cmd = tsndcmd.SetAccRange()
@@ -260,6 +340,14 @@ class TSND151(object):
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
+        # == Get Batt Status ==
+        cmd = tsndcmd.GetBattStatus()
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+        
         # == Get Device Status ==
         cmd = tsndcmd.GetDeviceStatus()
         response, num_tot, num_ok = self.process_command(
@@ -300,7 +388,7 @@ class TSND151(object):
         
         # == Start Recording ==
         cmd = tsndcmd.StartRecording()
-        response = self.process_command(cmd)
+        response, _, _ = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
 
     def stop_recording(self):
@@ -318,7 +406,7 @@ class TSND151(object):
         
         # == Memory Counts ==
         cmd = tsndcmd.GetMemEntryCount()
-        response = self.process_command(cmd)
+        response, _, _ = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
         outputs.update({
             "MemEntryCount": response,
@@ -326,7 +414,7 @@ class TSND151(object):
 
         # == Free Memory Size ==
         cmd = tsndcmd.GetFreeMemSize()
-        response = self.process_command(cmd)
+        response, _, _ = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
         outputs.update({
             "FreeMemorySize": response,
@@ -353,7 +441,7 @@ class TSND151(object):
         else:
             self.logger.info("Quit")
 
-    def check_entry_details(self, entry_index):
+    def check_entry_details(self):
         self.logger.info("== Check Entry Info ==")
         
         # == Check Entry Count ==
@@ -365,7 +453,14 @@ class TSND151(object):
         # client.start_recording()
         for i in range(num_entry):
             cmd = tsndcmd.GetEntryInfo()
-            response = self.process_command(cmd)
+            response, _, _ = self.process_command(cmd, params={"entry_index": i+1})
+            response["entry_index"] = i+1
+            self.logger.info(cmd.pformat(response))
+            time.sleep(1)
+
+            cmd = tsndcmd.GetEntryDetail()
+            response, _, _ = self.process_command(cmd, params={"entry_index": i+1})
+            response["entry_index"] = i+1
             self.logger.info(cmd.pformat(response))
             time.sleep(1)
 

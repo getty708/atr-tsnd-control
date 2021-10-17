@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 @hydra.main(config_path="conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
-    logger.info("== Check & Clear Memory ==")
+    logger.info("== Check Memory ==")
     
     # -- Initialize client object --
     client = TSND151(cfg.client.name, cfg.client.port, timeout=cfg.timeout)
