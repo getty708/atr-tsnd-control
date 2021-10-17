@@ -127,7 +127,13 @@ class TSND151(object):
                     break
         self.logger.info("Stop server")
         
-    def process_command(self, cmd: tsndcmd.CmdTemplate, params: dict=None):
+    def process_command(
+        self,
+        cmd: tsndcmd.CmdTemplate,
+        params: dict=None,
+        num_tot: int=0,
+        num_ok: int=0,
+    ):
         if params is None:
             msg = cmd.encode()
         else:
@@ -136,112 +142,158 @@ class TSND151(object):
         self.send(msg)
         response = self.listen(cmd.response_size)
         response = cmd.decode(response)
-        return response
+        
+        num_tot += 1
+        if response.get("status", 1) == 0:
+            num_ok += 1
+        return response, num_tot, num_ok
 
-    def init_device(self):        
+    def init_device(self):
+        # TODO: Refactoring is Needed!!
         self.logger.debug("== init_device ==")
+        num_tot, num_ok = 0, 0
         
         # == Send Device Time ==
         cmd = tsndcmd.SetDeviceTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
         
         # == Get Device Time ==
         cmd = tsndcmd.GetDeviceTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Ags Method ==
         cmd = tsndcmd.SetAgsMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"interval": 33, "send_freq": 30, "record_freq": 1},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Ags Method ==
         cmd = tsndcmd.GetAgsMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set GeoMagnetic Method ==
         cmd = tsndcmd.SetGeoMagneticMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"interval": 0, "send_freq": 0, "record_freq": 0},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get GeoMagnetic Method ==
         cmd = tsndcmd.GetGeoMagneticMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Pressure Method ==
         cmd = tsndcmd.SetPresMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"interval": 0, "send_freq": 0, "record_freq": 0},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Pressure Method ==
         cmd = tsndcmd.GetPresMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Battery Method ==
         cmd = tsndcmd.SetBattMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"send": 0, "record": 0},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Battery Method ==
         cmd = tsndcmd.GetBattMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Acc Range ==
         cmd = tsndcmd.SetAccRange()
-        response = self.process_command(cmd, params={"mode": 1})
+        response, num_tot, num_ok = self.process_command(
+            cmd, params={"mode": 1},
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Acc Range ==
         cmd = tsndcmd.GetAccRange()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Device Status ==
         cmd = tsndcmd.GetDeviceStatus()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
         
         # == Set Auto-power-off Setting ==
         cmd = tsndcmd.SetAutoPowerOffTime()
-        response = self.process_command(cmd, params={"minutes": 0})
+        response, num_tot, num_ok = self.process_command(
+            cmd, params={"minutes": 0},
+            num_tot=num_tot, num_ok=num_ok,   
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Auto-power-off Setting ==
         cmd = tsndcmd.GetAutoPowerOffTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
+
+        # == Summary ==
+        summary = {
+            "total": num_tot,
+            "suceeded":  num_ok,
+            "failed": num_tot - num_ok
+        }
+        self.logger.info("== Summary ==")
+        self.logger.info(f"{summary}")
 
     def start_recording(self):
         self.logger.info("== Start Recoding ==")

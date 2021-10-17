@@ -40,7 +40,7 @@ class CmdTemplate(object):
     def validate_response(self, response: bytes):
         assert response[1] == self.response_code, f"respose_code={self.response_code}, response={response}"
 
-    def decode(self):
+    def decode(self, response: bytes) -> dict[str:any]:
         raise NotImplementedError()
     
     def pformat(self, outputs: dict):
@@ -102,7 +102,10 @@ class GetDeviceTime(CmdTemplate):
             second=response[7],
             microsecond=(int.from_bytes(response[8:10], "little") * 1000),
         )
-        data = {"time": ts}
+        data = {
+            "status": 0,
+            "time": ts,
+        }
         return data
 
 
@@ -169,7 +172,8 @@ class StartRecording(CmdTemplate):
         )
 
         outputs = {
-            "status": status,
+            "status": 0,
+            "recoding_status": status,
             "start": ts_start,
             "end": ts_end,
         }
@@ -189,7 +193,6 @@ class StopRecording(CmdTemplate):
 
     def decode(self, response: bytes) -> dict:
         self.validate_response(response)
-
         outputs = {"status": response[2]}
         return outputs
 
@@ -227,8 +230,9 @@ class SetAgsMethod(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {
+            "status": response[2],
+        }
         return data
 
 
@@ -249,6 +253,7 @@ class GetAgsMethod(CmdTemplate):
         self.validate_response(response)
 
         data = {
+            "status": 0,
             "interval": response[2],
             "send_freq": response[3],
             "record_freq": response[4],
@@ -289,8 +294,9 @@ class SetGeoMagneticMethod(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {
+            "status": response[2],
+        }
         return data
 
 class GetGeoMagneticMethod(CmdTemplate):
@@ -308,8 +314,8 @@ class GetGeoMagneticMethod(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
         data = {
+            "status": 0,
             "interval": response[2],
             "send_freq": response[3],
             "record_freq": response[4],
@@ -351,8 +357,7 @@ class SetPresMethod(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {"status": response[2]}
         return data
 
 class GetPresMethod(CmdTemplate):
@@ -372,6 +377,7 @@ class GetPresMethod(CmdTemplate):
         self.validate_response(response)
 
         data = {
+            "status": 0,
             "interval": response[2],
             "send_freq": response[3],
             "record_freq": response[4],
@@ -409,8 +415,9 @@ class SetBattMethod(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {
+            "status": response[2],
+        }
         return data
 
 class GetBattMethod(CmdTemplate):
@@ -430,6 +437,7 @@ class GetBattMethod(CmdTemplate):
         self.validate_response(response)
 
         data = {
+            "status": 0,
             "send": response[2],
             "record": response[3],
         }
@@ -465,8 +473,7 @@ class SetAccRange(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {"status": response[2]}
         return data
 
 class GetAccRange(CmdTemplate):
@@ -491,6 +498,7 @@ class GetAccRange(CmdTemplate):
     def decode(self, response):
         assert response[1] == self.response_code
         data = {
+            "status": 0,
             "mode": response[2],
         }
         return data
@@ -536,6 +544,7 @@ class GetMemEntryCount(CmdTemplate):
         self.validate_response(response)
 
         data = {
+            "status": 0,
             "num_entry": response[2],
         }
         return data
@@ -569,6 +578,7 @@ class GetEntryInfo(CmdTemplate):
         )
         
         data = {
+            "status": 0,
             "ts_start": ts_start, 
             "num_entry": response[2],
             "num_records":int.from_bytes(response[10:14], "little"),
@@ -605,7 +615,7 @@ class ReadMemData(CmdTemplate):
     def decode(self, response):
         self.validate_response(response)
         data = {
-            "status": "done",
+            "status": 0,
         }
         return data
 
@@ -626,6 +636,7 @@ class GetFreeMemSize(CmdTemplate):
         self.validate_response(response)
 
         data = {
+            "status": 0,
             "num_free_entries": response[2],
             "num_free_records": int.from_bytes(response[2:6], "little"),
         }
@@ -645,6 +656,12 @@ class GetDeviceStatus(CmdTemplate):
     cmd_code = 0x3C
     response_code = 0xBC
     response_param_size = 1
+    translator = {
+        0: "USB Connected. Command mode.", # "USB 接続中コマンドモード",
+        1: "USB connected. Recording mode.", # "USB 接続中計測モード",
+        2: "Bluetooth conneted. Command mode.", # "Bluetooth 接続中コマンドモード",
+        3: "Bluetooth connected. Recording mode.", # "Bluetooth 接続中計測モード"
+    }
 
     def encode(self):
         cmd = [CMD_HEADER, self.cmd_code, 0x00]
@@ -655,7 +672,9 @@ class GetDeviceStatus(CmdTemplate):
         self.validate_response(response)
 
         data = {
-            "status": response[2],
+            "status": 0,
+            "device_status": response[2],
+            "device_status_display": self.translator.get(response[2]),
         }
         return data
 
@@ -685,8 +704,7 @@ class SetAutoPowerOffTime(CmdTemplate):
 
     def decode(self, response):
         self.validate_response(response)
-
-        data = response[2]
+        data = {"status": response[2]}
         return data
 
 class GetAutoPowerOffTime(CmdTemplate):
@@ -706,6 +724,7 @@ class GetAutoPowerOffTime(CmdTemplate):
         self.validate_response(response)
 
         data = {
+            "status": 0,
             "minutes": response[2],
         }
         return data
@@ -729,7 +748,7 @@ class StopReadMemData(CmdTemplate):
     def decode(self, response):
         self.validate_response(response)
         data = {
-            "status": response[2],
+            "status": 0,
         }
         return data
 
