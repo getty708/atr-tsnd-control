@@ -16,7 +16,6 @@ def main(cfg: DictConfig):
     client = TSND151(
         cfg.client.name, cfg.client.port,
         timeout=cfg.timeout,
-        # logger=getLogger(f"tsndctl.TSND151.{cfg.client.name}"),
     )
     time.sleep(5)
     logger.debug("Success ... Initialize TSND151() object and open connection.")

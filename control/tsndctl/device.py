@@ -107,18 +107,18 @@ class TSND151(object):
                 # TODO: (2) decode each segment
                 for i, res in enumerate(responses):
                     if len(res) < 2:
-                        self.logger.warning(f"ShortResponseMsg (response={res})")
+                        self.logger.warning(f"ShortResponseMsg (response={str(res)})")
                         continue
                     if res[0] != 0x9a:
-                        self.logger.warning(f"BrokenResponseMsg (response={res})")
+                        self.logger.warning(f"BrokenResponseMsg (response={str(res)})")
                         continue
                     cmd = handler.get(res[1], None) 
                     if cmd is None:
-                        self.logger.warning(f"Unknown Response (response={res})")
+                        self.logger.warning(f"UnknownResponse (response={str(res)})")
                         continue
                     elif cmd.name == "ReadMemData":
                         server_on = False
-                        self.logger.warning(f"ReadMemDataResponse is detected! (response={res})")
+                        self.logger.warning(f"ReadMemDataResponse is detected! (response={str(res)})")
                         break
                     else:
                         res = cmd.decode(res)
@@ -431,7 +431,7 @@ class TSND151(object):
         if res == "Y":
             # == Clear Memory ==
             cmd = tsndcmd.ClearMemoery()
-            response = self.process_command(cmd)
+            response, _, _ = self.process_command(cmd)
             self.logger.info(cmd.pformat(response))
 
             # == Memory Counts ==
@@ -468,10 +468,30 @@ class TSND151(object):
     def read_mem_data(self, entry_index):
         self.logger.info("== Read Mem Data ==")
         
+        # -- Donwload meta-data --
+        data = {"mode": "start", "entry": entry_index, "type": "meta-data"}
+        self.logger.info(f"ReadMemDataCtl:: {data}")
+
+        # Entry Info.
+        cmd = tsndcmd.GetEntryInfo()
+        self.logger.info(f"== Meta Data [Entry. {entry_index}] ==")
+        response, _, _ = self.process_command(cmd, params={"entry_index": entry_index})
+        response["entry_index"] = entry_index
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # Entry Detail Info.
+        cmd = tsndcmd.GetEntryDetail()
+        response, _, _ = self.process_command(cmd, params={"entry_index": entry_index})
+        response["entry_index"] = entry_index
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
         # Start Read Memoery Data
+        self.logger.info(f"== Body [Entry. {entry_index}] ==")
         cmd = tsndcmd.ReadMemData()
         msg = cmd.encode(entry_index)
-        data = {"mode": "start", "entry": entry_index}
+        data = {"mode": "start", "entry": entry_index, "type": "body"}
         self.logger.info(f"ReadMemDataCtl:: {data}")
         self.send(msg)
 

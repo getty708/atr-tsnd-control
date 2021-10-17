@@ -693,6 +693,9 @@ class GetMemEntryCount(CmdTemplate):
 
 class GetEntryInfo(CmdTemplate):
     """計測データ記録エントリ取得
+    
+    Note:
+        加速角速度データは, 1計測当たり2レコードとなる. その他は1レコード.
     """
     name = "EntryInfo"
     cmd_code = 0x37
@@ -721,8 +724,7 @@ class GetEntryInfo(CmdTemplate):
         
         data = {
             "status": 0,
-            "ts_start": ts_start, 
-            "num_entry": response[2],
+            "ts_start": ts_start.strftime("%Y-%m-%d %H-%M-%S.%f"), 
             "num_records":int.from_bytes(response[10:14], "little"),
             "ags_interval": response[14],
             "geo_interval": response[15],
@@ -779,7 +781,7 @@ class GetEntryDetail(CmdTemplate):
             "I2C_comm_speed": response[46], 
             "I2C_slave": response[47], # 加速度補正目標設定 
             "I2C_send_data_size": response[48],
-            "I2C_send_data": response[49:57],
+            "I2C_send_data": list(response[49:57]),
             "I2C_recv_data_size": response[57],
             "I2C_mode_ch1": response[58],
             "I2C_mode_ch2": response[59],
