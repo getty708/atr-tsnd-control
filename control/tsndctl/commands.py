@@ -66,8 +66,8 @@ class SetDeviceTime(CmdTemplate):
             ts.hour,
             ts.minute,
             ts.second,
-            (ms//256),
             (ms%256),
+            (ms//256),
         ]
         cmd = add_bcc(cmd)
         return bytes(cmd)
