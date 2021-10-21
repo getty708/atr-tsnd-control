@@ -107,18 +107,18 @@ class TSND151(object):
                 # TODO: (2) decode each segment
                 for i, res in enumerate(responses):
                     if len(res) < 2:
-                        self.logger.warning(f"ShortResponseMsg (response={res})")
+                        self.logger.warning(f"ShortResponseMsg (response={str(res)})")
                         continue
                     if res[0] != 0x9a:
-                        self.logger.warning(f"BrokenResponseMsg (response={res})")
+                        self.logger.warning(f"BrokenResponseMsg (response={str(res)})")
                         continue
                     cmd = handler.get(res[1], None) 
                     if cmd is None:
-                        self.logger.warning(f"Unknown Response (response={res})")
+                        self.logger.warning(f"UnknownResponse (response={str(res)})")
                         continue
                     elif cmd.name == "ReadMemData":
                         server_on = False
-                        self.logger.warning(f"ReadMemDataResponse is detected! (response={res})")
+                        self.logger.warning(f"ReadMemDataResponse is detected! (response={str(res)})")
                         break
                     else:
                         res = cmd.decode(res)
@@ -127,7 +127,13 @@ class TSND151(object):
                     break
         self.logger.info("Stop server")
         
-    def process_command(self, cmd: tsndcmd.CmdTemplate, params: dict=None):
+    def process_command(
+        self,
+        cmd: tsndcmd.CmdTemplate,
+        params: dict=None,
+        num_tot: int=0,
+        num_ok: int=0,
+    ):
         if params is None:
             msg = cmd.encode()
         else:
@@ -136,170 +142,379 @@ class TSND151(object):
         self.send(msg)
         response = self.listen(cmd.response_size)
         response = cmd.decode(response)
-        return response
+        
+        num_tot += 1
+        if response.get("status", 1) == 0:
+            num_ok += 1
+        return response, num_tot, num_ok
 
-    def init_device(self):        
+    def init_device(self):
+        # TODO: Refactoring is Needed!!
         self.logger.debug("== init_device ==")
+        num_tot, num_ok = 0, 0
         
         # == Send Device Time ==
         cmd = tsndcmd.SetDeviceTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
         
         # == Get Device Time ==
         cmd = tsndcmd.GetDeviceTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Ags Method ==
         cmd = tsndcmd.SetAgsMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"interval": 33, "send_freq": 30, "record_freq": 1},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Ags Method ==
         cmd = tsndcmd.GetAgsMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set GeoMagnetic Method ==
         cmd = tsndcmd.SetGeoMagneticMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"interval": 0, "send_freq": 0, "record_freq": 0},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get GeoMagnetic Method ==
         cmd = tsndcmd.GetGeoMagneticMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Pressure Method ==
         cmd = tsndcmd.SetPresMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"interval": 0, "send_freq": 0, "record_freq": 0},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Pressure Method ==
         cmd = tsndcmd.GetPresMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Battery Method ==
         cmd = tsndcmd.SetBattMethod()
-        response = self.process_command(
+        response, num_tot, num_ok = self.process_command(
             cmd,
             params={"send": 0, "record": 0},
+            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Battery Method ==
         cmd = tsndcmd.GetBattMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+        
+        # == Set/Get ExtInput Setting ==
+        # Set
+        cmd = tsndcmd.SetExtInputSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0, "edge_send": 0, "edge_record": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetExtInputSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Set/Get I2C Setting ==
+        # Set
+        cmd = tsndcmd.SetI2CSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetI2CSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Set/Get Quaternion Recoring Setting ==
+        # Set
+        cmd = tsndcmd.SetQuaternionSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetQuaternionSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Set/Get Ext 16bit AD Recoring Setting ==
+        # Set
+        cmd = tsndcmd.SetExt16ADSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            params={"interval": 0, "send": 0, "record": 0, "mode_ch1": 0, "mode_ch2": 0, "mode_ch3": 0, "mode_ch4": 0},
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.debug(cmd.pformat(response))
+        time.sleep(1)
+
+        # Get
+        cmd = tsndcmd.GetExt16ADSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Acc Range ==
         cmd = tsndcmd.SetAccRange()
-        response = self.process_command(cmd, params={"mode": 1})
+        response, num_tot, num_ok = self.process_command(
+            cmd, params={"mode": 1},
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Acc Range ==
         cmd = tsndcmd.GetAccRange()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
+        # == Get Batt Status ==
+        cmd = tsndcmd.GetBattStatus()
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+        
         # == Get Device Status ==
         cmd = tsndcmd.GetDeviceStatus()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
         
         # == Set Auto-power-off Setting ==
         cmd = tsndcmd.SetAutoPowerOffTime()
-        response = self.process_command(cmd, params={"minutes": 0})
+        response, num_tot, num_ok = self.process_command(
+            cmd, params={"minutes": 0},
+            num_tot=num_tot, num_ok=num_ok,   
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Auto-power-off Setting ==
         cmd = tsndcmd.GetAutoPowerOffTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
+        # == Summary ==
+        summary = {
+            "total": num_tot,
+            "suceeded":  num_ok,
+            "failed": num_tot - num_ok
+        }
+        self.logger.info("== Summary ==")
+        self.logger.info(f"{summary}")
+
+
     def get_device_status(self):        
         self.logger.debug("== Get Deivice Status ==")
+        num_tot, num_ok = 0, 0
         
         # == Get Device Time ==
         cmd = tsndcmd.GetDeviceTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Ags Method ==
         cmd = tsndcmd.GetAgsMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get GeoMagnetic Method ==
         cmd = tsndcmd.GetGeoMagneticMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Pressure Method ==
         cmd = tsndcmd.GetPresMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Battery Method ==
         cmd = tsndcmd.GetBattMethod()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+        
+        # == Get ExtInput Setting ==
+        cmd = tsndcmd.GetExtInputSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get I2C Setting ==
+        cmd = tsndcmd.GetI2CSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Quaternion Recoring Setting ==
+        cmd = tsndcmd.GetQuaternionSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Ext 16bit AD Recoring Setting ==
+        cmd = tsndcmd.GetExt16ADSetting()
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Get Acc Range ==
         cmd = tsndcmd.GetAccRange()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
+        # == Get Batt Status ==
+        cmd = tsndcmd.GetBattStatus()
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+        
         # == Get Device Status ==
         cmd = tsndcmd.GetDeviceStatus()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd, num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
         
         # == Get Auto-power-off Setting ==
         cmd = tsndcmd.GetAutoPowerOffTime()
-        response = self.process_command(cmd)
+        response, num_tot, num_ok = self.process_command(
+            cmd,
+            num_tot=num_tot, num_ok=num_ok,
+        )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
+
+        # == Summary ==
+        summary = {
+            "total": num_tot,
+            "suceeded":  num_ok,
+            "failed": num_tot - num_ok
+        }
+        self.logger.info("== Summary ==")
+        self.logger.info(f"{summary}")
+
 
     def start_recording(self):
         self.logger.info("== Start Recoding ==")
         
         # == Start Recording ==
         cmd = tsndcmd.StartRecording()
-        response = self.process_command(cmd)
+        response, _, _ = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
 
     def stop_recording(self):
@@ -317,7 +532,7 @@ class TSND151(object):
         
         # == Memory Counts ==
         cmd = tsndcmd.GetMemEntryCount()
-        response = self.process_command(cmd)
+        response, _, _ = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
         outputs.update({
             "MemEntryCount": response,
@@ -325,7 +540,7 @@ class TSND151(object):
 
         # == Free Memory Size ==
         cmd = tsndcmd.GetFreeMemSize()
-        response = self.process_command(cmd)
+        response, _, _ = self.process_command(cmd)
         self.logger.info(cmd.pformat(response))
         outputs.update({
             "FreeMemorySize": response,
@@ -342,7 +557,7 @@ class TSND151(object):
         if res == "Y":
             # == Clear Memory ==
             cmd = tsndcmd.ClearMemoery()
-            response = self.process_command(cmd)
+            response, _, _ = self.process_command(cmd)
             self.logger.info(cmd.pformat(response))
 
             # == Memory Counts ==
@@ -352,14 +567,57 @@ class TSND151(object):
         else:
             self.logger.info("Quit")
 
+    def check_entry_details(self):
+        self.logger.info("== Check Entry Info ==")
+        
+        # == Check Entry Count ==
+        outputs = self.check_memory_status()
+        time.sleep(5)
+        num_entry = outputs["MemEntryCount"]["num_entry"]
+        
+        # -- Download --
+        # client.start_recording()
+        for i in range(num_entry):
+            cmd = tsndcmd.GetEntryInfo()
+            response, _, _ = self.process_command(cmd, params={"entry_index": i+1})
+            response["entry_index"] = i+1
+            self.logger.info(cmd.pformat(response))
+            time.sleep(1)
+
+            cmd = tsndcmd.GetEntryDetail()
+            response, _, _ = self.process_command(cmd, params={"entry_index": i+1})
+            response["entry_index"] = i+1
+            self.logger.info(cmd.pformat(response))
+            time.sleep(1)
+
 
     def read_mem_data(self, entry_index):
         self.logger.info("== Read Mem Data ==")
         
+        # -- Donwload meta-data --
+        data = {"mode": "start", "entry": entry_index, "type": "meta-data"}
+        self.logger.info(f"ReadMemDataCtl:: {data}")
+
+        # Entry Info.
+        cmd = tsndcmd.GetEntryInfo()
+        self.logger.info(f"== Meta Data [Entry. {entry_index}] ==")
+        response, _, _ = self.process_command(cmd, params={"entry_index": entry_index})
+        response["entry_index"] = entry_index
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # Entry Detail Info.
+        cmd = tsndcmd.GetEntryDetail()
+        response, _, _ = self.process_command(cmd, params={"entry_index": entry_index})
+        response["entry_index"] = entry_index
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
         # Start Read Memoery Data
+        self.logger.info(f"== Body [Entry. {entry_index}] ==")
         cmd = tsndcmd.ReadMemData()
         msg = cmd.encode(entry_index)
-        data = {"mode": "start", "entry": entry_index}
+        data = {"mode": "start", "entry": entry_index, "type": "body"}
         self.logger.info(f"ReadMemDataCtl:: {data}")
         self.send(msg)
 
