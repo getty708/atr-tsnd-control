@@ -63,6 +63,8 @@ timeout: 5
 Which entry do you want to download ? (Entry.1 ~ 4) [type the number] >> 
 ```
 
+For convert logfile to CSV, check [this notebook](https://github.com/getty708/atr-tk/blob/master/control/notebooks/Dev_CheckDownloadedRecords.ipynb).
+
 ## Supported Command
 
 TBA
