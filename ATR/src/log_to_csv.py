@@ -35,6 +35,8 @@ def make_parser():
                         help="Str(%Y-%m-%d), Date which the log data was recorded.")
     parser.add_argument('--shift', default=0., type=float,
                         help="Milli second to shift csv's timestamp")
+    parser.add_argument('--unit', default='g',
+                        help="Acc unit to convert to, {g, m/s2}")
     return parser
 
 
@@ -144,8 +146,8 @@ def main():
     # Raed Input file
     print("Start: Read and convert log files to pd.DataFrame")
     df = read_log_file(args.filename_input, args.sensor)
-    assert len(df[df.duplicated(["time_ATR"])]) == 0, "There is some confliction among some time stamps (ATR format)"
-    #df = df.drop_duplicates(["time_ATR"], keep="last").reset_index(drop=True)
+    #assert len(df[df.duplicated(["time_ATR"])]) == 0, "There is some confliction among some time stamps (ATR format)"
+    df = df.drop_duplicates(["time_ATR"], keep="last").reset_index(drop=True)
     print(df.head())
     print(">> Success\n")
 
@@ -157,7 +159,12 @@ def main():
 
     # Convert Unit
     if args.sensor == "ags":
-        df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float)    / 10000.
+
+        if args.unit == "g":
+            df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float)    / 10000.
+        else:
+            df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float)    * (9.80665/ 10000.)
+
         df[["gyro_x","gyro_y","gyro_z",]] = df[["gyro_x","gyro_y","gyro_z",]].astype(float) / 100.
     elif args.sensor == "geo":
         df[["geo_x","geo_y","geo_z",]]    = df[["geo_x","geo_y","geo_z",]].astype(float)    / 10.**(7)

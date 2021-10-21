@@ -27,12 +27,14 @@ def make_parser():
     # Add Arguments
     parser.add_argument('--path-input-log', required=True,
                         help="A path to an input log file.")
+    parser.add_argument('--path-output-dir', required=True,
+                        help="A path to an output log file.")
     parser.add_argument('--date', required=True,
                         help="Str(%Y-%m-%d), Date which the log data was recorded.")
     parser.add_argument('--shift', required=True,
                         help="Milli second to shift csv's timestamp")
-    parser.add_argument('--path-output-dir', required=True,
-                        help="A path to an output log file.")
+    parser.add_argument('--unit', default='g',
+                        help="Acc unit to convert to, {g, m/s2}")
     return parser
 
 
@@ -42,7 +44,7 @@ def read_log_file(path_to_log):
     """ Read a log file and convert it into pd.DataFrame
 
     Args.
-    ------
+
     - path_to_log: Str, path, [columns="sensor,time_ATR,accX,accY,accZ,gyroX,gyroY,gyroZ"]
 
     Return
@@ -177,6 +179,8 @@ def main():
     # Raed Input file
     print("Start: Read and convert log files to pd.DataFrame")
     df = read_log_file(args.path_input_log)
+    #assert len(df[df.duplicated(["time_ATR"])]) == 0, "There is some confliction among some time stamps (ATR format)"
+    df = df.drop_duplicates(["time_ATR"], keep="last").reset_index(drop=True)
     print(df.head())
     print(">> Success\n")
 
@@ -185,6 +189,14 @@ def main():
     df = add_timestamps(df, base_timestamp)
     print(df.head())
     print(">> Success\n")
+
+    # Convert Unit
+    if args.unit == "g":
+        df[["accX","accY","accZ",]]    = df[["accX","accY","accZ",]].astype(float)    / 10000.
+    else:
+        df[["accX","accY","accZ",]]    = df[["accX","accY","accZ",]].astype(float)    * (9.80665/ 10000.)
+
+    df[["gyroX","gyroY","gyroZ",]] = df[["gyroX","gyroY","gyroZ",]].astype(float) / 100.
 
     # Write
     print("Start: Write CSVs.")

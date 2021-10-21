@@ -265,9 +265,7 @@ def main_mix(args, merge_with_timestamp=False):
     ## Excahnge the order of columns
     cols = ["time","label","label_id", "acc_x","acc_y","acc_z", "gyro_x","gyro_y","gyro_z"]
     df = df[cols]
-    ## Convert unit [0.1mG ==> G, 0.1dps ==> dps]
-    df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float) / 10000.
-    df[["gyro_x","gyro_y","gyro_z",]] = df[["gyro_x","gyro_y","gyro_z",]].astype(float) / 100.
+    
     print(df.head())
     print(">> Success: df.shape={}\n".format(df.shape))
     
