@@ -243,6 +243,57 @@ class TSND151(object):
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
+    def get_device_status(self):        
+        self.logger.debug("== Get Deivice Status ==")
+        
+        # == Get Device Time ==
+        cmd = tsndcmd.GetDeviceTime()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Ags Method ==
+        cmd = tsndcmd.GetAgsMethod()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get GeoMagnetic Method ==
+        cmd = tsndcmd.GetGeoMagneticMethod()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Pressure Method ==
+        cmd = tsndcmd.GetPresMethod()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Battery Method ==
+        cmd = tsndcmd.GetBattMethod()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Acc Range ==
+        cmd = tsndcmd.GetAccRange()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
+        # == Get Device Status ==
+        cmd = tsndcmd.GetDeviceStatus()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+        
+        # == Get Auto-power-off Setting ==
+        cmd = tsndcmd.GetAutoPowerOffTime()
+        response = self.process_command(cmd)
+        self.logger.info(cmd.pformat(response))
+        time.sleep(1)
+
     def start_recording(self):
         self.logger.info("== Start Recoding ==")
         
