@@ -28,12 +28,12 @@ def main(cfg: DictConfig):
     
     # -- Download --
     # client.start_recording()
-    for i in range(num_entry):
-        print(f"[{i+1:>2}/{num_entry:>2}] Do you want to download entry {i+1}? [Y/n] >> ")
-        choice = input()
-        if choice == "Y":
-            client.read_mem_data(i+1)
-            time.sleep(2)
+    if num_entry > 0:
+        print(f"Which entry do you want to download ? (Entry.1 ~ {num_entry}) [type the number] >> ")
+        entry_index= int(input())
+        assert entry_index > 0 and entry_index <= num_entry
+        client.read_mem_data(entry_index)
+        time.sleep(2)
 
     # == End ==
     client.terminate()
