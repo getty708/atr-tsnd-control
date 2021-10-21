@@ -63,7 +63,7 @@ class TSND151(object):
             self.is_thread_running= False
 
     def terminate(self):
-        self.logger.info(f"Teriminate Device[{self.name}]")
+        self.logger.info(f"Terminate serial connection to the device [{self.name}]")
         self.is_running = False
         self.ser.close()
 

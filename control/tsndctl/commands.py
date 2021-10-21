@@ -642,6 +642,7 @@ class GetAccRange(CmdTemplate):
         data = {
             "status": 0,
             "mode": response[2],
+            "mode_display": self.translation.get(response[2]),
         }
         return data
 
