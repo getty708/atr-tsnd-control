@@ -117,9 +117,9 @@ class TSND151(object):
                         self.logger.warning(f"UnknownResponse (response={str(res)})")
                         continue
                     elif cmd.name == "ReadMemData":
-                        server_on = False
+                        server_on = False # FIXME: ??
                         self.logger.warning(f"ReadMemDataResponse is detected! (response={str(res)})")
-                        break
+                        # break
                     else:
                         res = cmd.decode(res)
                         self.logger.info(cmd.pformat(res))
@@ -149,11 +149,15 @@ class TSND151(object):
         return response, num_tot, num_ok
 
     def init_device(self):
+        self.set_device_params()
+        self.get_device_status()
+
+    def set_device_params(self):
         # TODO: Refactoring is Needed!!
-        self.logger.debug("== init_device ==")
+        self.logger.debug("== Set Device Params ==")
         num_tot, num_ok = 0, 0
         
-        # == Send Device Time ==
+        # -- Send Device Time --
         cmd = tsndcmd.SetDeviceTime()
         response, num_tot, num_ok = self.process_command(
             cmd, num_tot=num_tot, num_ok=num_ok,
@@ -161,15 +165,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
         
-        # == Get Device Time ==
-        cmd = tsndcmd.GetDeviceTime()
-        response, num_tot, num_ok = self.process_command(
-            cmd, num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set Ags Method ==
+        # -- Set Ags Method --
         cmd = tsndcmd.SetAgsMethod()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -179,15 +175,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # == Get Ags Method ==
-        cmd = tsndcmd.GetAgsMethod()
-        response, num_tot, num_ok = self.process_command(
-            cmd, num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set GeoMagnetic Method ==
+        # -- Set GeoMagnetic Method --
         cmd = tsndcmd.SetGeoMagneticMethod()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -197,15 +185,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # == Get GeoMagnetic Method ==
-        cmd = tsndcmd.GetGeoMagneticMethod()
-        response, num_tot, num_ok = self.process_command(
-            cmd, num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set Pressure Method ==
+        # -- Set Pressure Method --
         cmd = tsndcmd.SetPresMethod()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -215,16 +195,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # == Get Pressure Method ==
-        cmd = tsndcmd.GetPresMethod()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set Battery Method ==
+        # -- Set Battery Method --
         cmd = tsndcmd.SetBattMethod()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -233,18 +204,8 @@ class TSND151(object):
         )
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
-
-        # == Get Battery Method ==
-        cmd = tsndcmd.GetBattMethod()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
         
-        # == Set/Get ExtInput Setting ==
-        # Set
+        # -- Set/Get ExtInput Setting --
         cmd = tsndcmd.SetExtInputSetting()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -254,17 +215,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # Get
-        cmd = tsndcmd.GetExtInputSetting()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set/Get I2C Setting ==
-        # Set
+        # -- Set/Get I2C Setting --
         cmd = tsndcmd.SetI2CSetting()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -274,17 +225,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # Get
-        cmd = tsndcmd.GetI2CSetting()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set/Get Quaternion Recoring Setting ==
-        # Set
+        # -- Set Quaternion Recoring Setting --
         cmd = tsndcmd.SetQuaternionSetting()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -294,17 +235,7 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # Get
-        cmd = tsndcmd.GetQuaternionSetting()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Set/Get Ext 16bit AD Recoring Setting ==
-        # Set
+        # -- Set/Get Ext 16bit AD Recoring Setting --
         cmd = tsndcmd.SetExt16ADSetting()
         response, num_tot, num_ok = self.process_command(
             cmd,
@@ -312,15 +243,6 @@ class TSND151(object):
             num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
-        time.sleep(1)
-
-        # Get
-        cmd = tsndcmd.GetExt16ADSetting()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
         time.sleep(1)
 
         # == Set Acc Range ==
@@ -332,44 +254,11 @@ class TSND151(object):
         self.logger.debug(cmd.pformat(response))
         time.sleep(1)
 
-        # == Get Acc Range ==
-        cmd = tsndcmd.GetAccRange()
-        response, num_tot, num_ok = self.process_command(
-            cmd, num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Get Batt Status ==
-        cmd = tsndcmd.GetBattStatus()
-        response, num_tot, num_ok = self.process_command(
-            cmd, num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-        
-        # == Get Device Status ==
-        cmd = tsndcmd.GetDeviceStatus()
-        response, num_tot, num_ok = self.process_command(
-            cmd, num_tot=num_tot, num_ok=num_ok,
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-        
-        # == Set Auto-power-off Setting ==
+        # -- Set Auto-power-off Setting --
         cmd = tsndcmd.SetAutoPowerOffTime()
         response, num_tot, num_ok = self.process_command(
             cmd, params={"minutes": 0},
             num_tot=num_tot, num_ok=num_ok,   
-        )
-        self.logger.info(cmd.pformat(response))
-        time.sleep(1)
-
-        # == Get Auto-power-off Setting ==
-        cmd = tsndcmd.GetAutoPowerOffTime()
-        response, num_tot, num_ok = self.process_command(
-            cmd,
-            num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.info(cmd.pformat(response))
         time.sleep(1)
@@ -382,7 +271,6 @@ class TSND151(object):
         }
         self.logger.info("== Summary ==")
         self.logger.info(f"{summary}")
-
 
     def get_device_status(self):        
         self.logger.debug("== Get Deivice Status ==")
