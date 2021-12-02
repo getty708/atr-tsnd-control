@@ -2,7 +2,7 @@ import datetime
 import sys
 import pytest
 import numpy as np
-from control.tsndctl.commands import GetMemEntryCount, RecodingStartedEvent
+# from control.tsndctl.commands import GetMemEntryCount, RecodingStartedEvent
 sys.path.append("../")
 
 from tsndctl import commands as cmd
@@ -435,3 +435,35 @@ def test_RecodingStartedEvent__01(response):
 
 def test_RecodingStoppedEvent__01(response):
     raise NotImplementedError()
+
+
+@pytest.mark.parametrize("response,ts,qua,acc,gyro", (
+    (
+        bytes([
+            0x9A, 0x8A,
+            0x0B, 0x00, 0x00, 0x00, # ts
+            0x04, 0x00, # Qua-W
+            0x01, 0x00, # Qua-X
+            0x02, 0x00, # Qua-Y
+            0x03, 0x00, # Qua-Z
+            0x01, 0x00, 0x00, # Acc-X
+            0x02, 0x00, 0x00, # Acc-Y
+            0x03, 0x00, 0x00, # Acc-Z
+            0x04, 0x00, 0x00, # Gyro-X
+            0x05, 0x00, 0x00, # Gyro-Y
+            0x06, 0x00, 0x00, # Gyro-Z
+        ]),
+        11,
+        [4, 1, 2, 3],
+        [1, 2, 3],
+        [4, 5, 6],
+    ),
+))
+def test_QuaternionEvent__01(response, ts, qua, acc, gyro):
+    outputs = cmd.QuaternionEvent().decode(response)
+    print("outputs:", outputs)
+
+    assert outputs["ts"] == ts
+    np.testing.assert_array_equal(outputs["qua"], qua)
+    np.testing.assert_array_equal(outputs["acc"], acc)
+    np.testing.assert_array_equal(outputs["gyro"], gyro)

@@ -87,6 +87,7 @@ class TSND151(object):
             0x80: tsndcmd.AgsDataEvent(),
             0x88: tsndcmd.RecodingStartedEvent(),
             0x89: tsndcmd.RecodingStoppedEvent(),
+            0x8A: tsndcmd.QuaternionEvent(),
             0xB9: tsndcmd.ReadMemData(),
             0x8F: tsndcmd.StopRecording(), # FIXME: Use dummy decoder.
         }
@@ -229,7 +230,7 @@ class TSND151(object):
         cmd = tsndcmd.SetQuaternionSetting()
         response, num_tot, num_ok = self.process_command(
             cmd,
-            params={"interval": 0, "send": 0, "record": 0},
+            params={"interval": 30, "send": 30, "record": 1},
             num_tot=num_tot, num_ok=num_ok,
         )
         self.logger.debug(cmd.pformat(response))
