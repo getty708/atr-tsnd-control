@@ -984,7 +984,7 @@ class SetQuaternionSetting(CmdTemplate):
         """
         Args:
             interval (int): 計測 OFF or 計測周期
-                0: 計測 OFF, 2: 計測周期 (1ms～255ms, 1ms 単位指定)
+                0: 計測 OFF, 2: 計測周期 (1ms～255ms, 1ms 単位指定, 5ms刻み)
             send (int): 計測データ送信設定
                 0: 送信しない, 1: 平均回数 (1～255回)
             record (int): 計測データ記録設定
@@ -1260,5 +1260,59 @@ class RecodingStoppedEvent(CmdTemplate):
         outputs = {
             "recording": "stopped",
             "status": response[2],
+        }
+        return outputs
+
+
+class QuaternionEvent(CmdTemplate):
+    """加速度角速度計測データ通知
+    
+    Data Field:
+    * TickTime[4Byte] = 計測年月日の 00:00:00:000 からの経過時間(ms 単位)
+    * クオータニオンデータ W [2Byte] = -10000～10000 (0.0001 単位)
+    * クオータニオンデータ X [2Byte] = -10000～10000 (0.0001 単位)
+    * クオータニオンデータ Y [2Byte] = -10000～10000 (0.0001 単位)
+    * クオータニオンデータ Z [2Byte] = -10000～10000 (0.0001 単位)
+    * 加速度データ X [3Byte] = -160000～160000(0.1mg 単位)
+    * 加速度データ Y [3Byte] = -160000～160000(0.1mg 単位)
+    * 加速度データ Z [3Byte] = -160000～160000(0.1mg 単位)
+    * 角速度データ X [3Byte] = -200000～200000(0.01dps 単位)
+    * 角速度データ Y [3Byte] = -200000～200000(0.01dps 単位)
+    * 角速度データ Z [3Byte] = -200000～200000(0.01dps 単位)
+    """
+    name = "QuaternionEvent"
+    cmd_code = None
+    response_code = 0x8A
+    response_param_size = 30
+
+    def decode(self, response: bytes) -> dict:
+        self.validate_response(response)
+        
+        # -- Timestamp --
+        ts = int.from_bytes(response[2:6], "little")
+
+        # -- Sensor Readings --
+        qua = [
+            int.from_bytes(response[6:8], "little", signed=True), # Qua-W
+            int.from_bytes(response[8:10], "little", signed=True), # Qua-X
+            int.from_bytes(response[10:12], "little", signed=True), # Qua-Y
+            int.from_bytes(response[12:14], "little", signed=True), # Qua-Z
+        ]
+        acc = [
+            int.from_bytes(response[14:17], "little", signed=True), # Acc-X
+            int.from_bytes(response[17:20], "little", signed=True), # Acc-Y
+            int.from_bytes(response[20:23], "little", signed=True), # Acc-Z
+        ]
+        gyro = [
+            int.from_bytes(response[23:26], "little", signed=True), # Gyro-X
+            int.from_bytes(response[26:29], "little", signed=True), # Gyro-Y
+            int.from_bytes(response[29:31], "little", signed=True), # Gyro-Z
+        ]
+
+        outputs = {
+            "ts": ts,
+            "qua": qua,
+            "acc": acc,
+            "gyro": gyro,
         }
         return outputs
