@@ -26,7 +26,7 @@ def make_parser():
 
     # Add Arguments
     parser.add_argument('--sensor', required=True,
-                        help="Sensor type, {ags, geo}")
+                        help="Sensor type, {ags, geo, qags}")
     parser.add_argument('--filename-input', required=True,
                         help="Input log filename (*.log)")
     parser.add_argument('--filename-output', required=True,
@@ -38,8 +38,6 @@ def make_parser():
     parser.add_argument('--unit', default='g',
                         help="Acc unit to convert to, {g, m/s2}")
     return parser
-
-
 
 # -------------------------------------------------------------    
 # ======================================
@@ -65,6 +63,8 @@ def read_log_file(path_to_log, sensor):
         print(">> Done: Read CSV [path={}, df={}]".format(path_to_log, len(df)))
     if sensor == "ags":
         cols = ["sensor", "time_ATR", "acc_x", "acc_y", "acc_z", "gyro_x", "gyro_y", "gyro_z"]
+    elif sensor == "qags":
+        cols = ["sensor", "time_ATR","quatW","quatX","quatY","quatZ", "accX", "accY", "accZ", "gyroX", "gyroY", "gyroZ"]
     elif sensor == "geo":
         cols = ["sensor", "time_ATR", "geo_x", "geo_y", "geo_z",]
     df = pd.DataFrame(df, columns=cols)
@@ -158,7 +158,7 @@ def main():
     print(">> Success\n")
 
     # Convert Unit
-    if args.sensor == "ags":
+    if args.sensor == "ags" or "qags":
 
         if args.unit == "g":
             df[["acc_x","acc_y","acc_z",]]    = df[["acc_x","acc_y","acc_z",]].astype(float)    / 10000.
@@ -169,6 +169,8 @@ def main():
     elif args.sensor == "geo":
         df[["geo_x","geo_y","geo_z",]]    = df[["geo_x","geo_y","geo_z",]].astype(float)    / 10.**(7)
     
+    if args.sensor == "qags":
+        df[["quatW","quatX","quatY","quatZ",]] = df[["quatW","quatX","quatY","quatZ",]].astype(float) / 10000.
 
     # Write
     print("Start: Write CSVs.")
@@ -177,6 +179,8 @@ def main():
         cols = ["time","label","label_id","acc_x","acc_y","acc_z","gyro_x","gyro_y","gyro_z"]
     elif args.sensor == "geo":
         cols = ["time","label","label_id","geo_x","geo_y","geo_z",]
+    elif args.sensor == "qags":
+        cols = ["time","label","label_id","quatW","quatX","quatY","quatZ", "accX", "accY", "accZ", "gyroX", "gyroY", "gyroZ"]
     df = df[cols]
     df.to_csv(args.filename_output, index=False)
     print(">> Done: Write csv.[{}, {}]".format(df.shape, args.filename_output))

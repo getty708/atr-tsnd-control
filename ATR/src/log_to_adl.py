@@ -35,12 +35,14 @@ def make_parser():
                         help="Milli second to shift csv's timestamp")
     parser.add_argument('--unit', default='g',
                         help="Acc unit to convert to, {g, m/s2}")
+    parser.add_argument('--sensor', default='ags',
+                        help="ATR recording type, {ags,qags}")
     return parser
 
 
 
 # -------------------------------------------------------------
-def read_log_file(path_to_log):
+def read_log_file(path_to_log,sensor_type):
     """ Read a log file and convert it into pd.DataFrame
 
     Args.
@@ -55,9 +57,13 @@ def read_log_file(path_to_log):
     with open(path_to_log, 'r') as f:
         reader = csv.reader(f)
         for row in reader:
+            if "qags" in row: df.append(row)
             if "ags" in row: df.append(row)
         print(">> Done: Read CSV [path={}, df={}]".format(path_to_log, len(df)))
-    df = pd.DataFrame(df, columns=["sensor", "time_ATR", "accX", "accY", "accZ", "gyroX", "gyroY", "gyroZ"])
+    if sensor_type == 'qags':
+        df = pd.DataFrame(df, columns=["sensor", "time_ATR","quatW","quatX","quatY","quatZ", "accX", "accY", "accZ", "gyroX", "gyroY", "gyroZ"])
+    else:
+        df = pd.DataFrame(df, columns=["sensor", "time_ATR", "accX", "accY", "accZ", "gyroX", "gyroY", "gyroZ"])
     print(">> Done: df.shape={}".format(df.shape))
     return df
 
@@ -130,7 +136,7 @@ def setup_dir(path):
     return path
 
 
-def write_csv(df, path_output_dir):
+def write_csv(df, path_output_dir,sensor_type):
     groups = df["group"].drop_duplicates().reset_index(drop=True)
     # Clean ouput directory
     if os.path.isdir(path_output_dir):
@@ -148,6 +154,8 @@ def write_csv(df, path_output_dir):
         target_file_name = group+"00_acc2.csv"
         # CSV書き込み
         filename = os.path.join(target_path, target_file_name)
+        #df_selected["accX"] = -1 * df_selected["accX"]
+        #df_selected["accY"] = -1 * df_selected["accY"]
         df_selected[["time", "accX", "accY", "accZ"]].to_csv(filename, index=False, header=["time", "x", "y", "z"])
         print(">> Done: write [Acc ] =>{}".format(target_path+target_file_name))
 
@@ -160,6 +168,20 @@ def write_csv(df, path_output_dir):
         filename = os.path.join(target_path, target_file_name,)
         df_selected[["time", "gyroX", "gyroY", "gyroZ"]].to_csv(filename, index=False, header=["time", "x", "y", "z"])
         print(">> Done: write [Gyro] => {}".format(target_path+target_file_name))
+
+        # 書き込むディレクトリを選択: Quat
+        ## ディレクトリの確認
+        if sensor_type == 'qags':
+            target_path = setup_dir(os.path.join(path_output_dir, "Quat", "quat"))
+            ## 書き込みファイルを指定
+            target_file_name = group+"00_quat.csv"
+            # CSV書き込み
+            filename = os.path.join(target_path, target_file_name,)
+            df_selected[["time","quatW","quatX","quatY","quatZ"]].to_csv(filename, index=False, header=["time","w", "x", "y", "z"])
+            print(">> Done: write [Quat] => {}".format(target_path+target_file_name))
+
+        
+
     return len(groups)
 
 
@@ -175,10 +197,13 @@ def main():
     base_timestamp = dt.datetime.strptime(args.date, '%Y-%m-%d') + dt.timedelta(milliseconds=float(args.shift))
     print(">> Done: base_timestamp={}".format(base_timestamp))
     print(">> Success\n")
+
+    sensor_type = str(args.sensor)
+    print('sensor_type', sensor_type)
     
     # Raed Input file
     print("Start: Read and convert log files to pd.DataFrame")
-    df = read_log_file(args.path_input_log)
+    df = read_log_file(args.path_input_log,sensor_type)
     #assert len(df[df.duplicated(["time_ATR"])]) == 0, "There is some confliction among some time stamps (ATR format)"
     df = df.drop_duplicates(["time_ATR"], keep="last").reset_index(drop=True)
     print(df.head())
@@ -190,6 +215,9 @@ def main():
     print(df.head())
     print(">> Success\n")
 
+    #Check sensor type
+    
+
     # Convert Unit
     if args.unit == "g":
         df[["accX","accY","accZ",]]    = df[["accX","accY","accZ",]].astype(float)    / 10000.
@@ -198,9 +226,12 @@ def main():
 
     df[["gyroX","gyroY","gyroZ",]] = df[["gyroX","gyroY","gyroZ",]].astype(float) / 100.
 
+    if args.sensor == "qags":
+        df[["quatW","quatX","quatY","quatZ",]] = df[["quatW","quatX","quatY","quatZ",]].astype(float) / 10000.
+
     # Write
     print("Start: Write CSVs.")
-    n_files = write_csv(df, args.path_output_dir)
+    n_files = write_csv(df, args.path_output_dir,sensor_type)
     print(">> Success: {} files were created\n".format(n_files))
     
     
