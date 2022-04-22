@@ -40,7 +40,6 @@ def make_parser():
     return parser
 
 
-
 # -------------------------------------------------------------
 def read_log_file(path_to_log,sensor_type):
     """ Read a log file and convert it into pd.DataFrame
@@ -232,8 +231,7 @@ def main():
     # Write
     print("Start: Write CSVs.")
     n_files = write_csv(df, args.path_output_dir,sensor_type)
-    print(">> Success: {} files were created\n".format(n_files))
-    
+    print(">> Success: {} files were created\n".format(n_files))    
     
 # -------------------------------------------------------------
 if __name__=='__main__':
