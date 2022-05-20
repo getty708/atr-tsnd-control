@@ -79,7 +79,7 @@ def main():
                 print("python log_to_adl.py " + ("--path-input-log "+path_to_log) + (" --path-output-dir "+path_output_dir) + (" --date "+ date[:4]+'-'+date[4:6]+'-'+date[-2:]) + (" --shift "+shift ) + (" --unit "+ args.unit) + 
                       (" --sensor "+ sensor))
 
-                subprocess.run("python log_to_adl.py " + ("--path-input-log "+path_to_log) + (" --path-output-dir "+path_output_dir) + (" --date "+ date[:4]+'-'+date[5:7]+'-'+date[-2:]) + (" --shift "+shift ) + (" --unit "+ args.unit) + 
+                subprocess.run("python log_to_adl.py " + ("--path-input-log "+path_to_log) + (" --path-output-dir "+path_output_dir) + (" --date "+ date[:4]+'-'+date[4:6]+'-'+date[-2:]) + (" --shift "+shift ) + (" --unit "+ args.unit) + 
                       (" --sensor "+ sensor))
 
         
