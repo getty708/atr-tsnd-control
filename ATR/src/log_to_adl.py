@@ -147,7 +147,7 @@ def write_csv(df, path_output_dir,sensor_type):
         df_selected = df[df["group"] == group].sort_values(by=["timestamp"])
         # 書き込むディレクトリを選択: Acc
         ## ディレクトリの確認
-        target_path = setup_dir(os.path.join(path_output_dir, "acc2", "acc2_R"))
+        target_path = setup_dir(os.path.join(path_output_dir, "acc2"))
         # target_path = self.activate_dir(os.path.join(target_path, "acc2_R"))
         ## 書き込みファイルを指定
         target_file_name = group+"00_acc2.csv"
@@ -160,7 +160,7 @@ def write_csv(df, path_output_dir,sensor_type):
 
         # 書き込むディレクトリを選択: Gyro
         ## ディレクトリの確認
-        target_path = setup_dir(os.path.join(path_output_dir, "Gyro", "gyro"))
+        target_path = setup_dir(os.path.join(path_output_dir, "gyro"))
         ## 書き込みファイルを指定
         target_file_name = group+"00_gyro.csv"
         # CSV書き込み
@@ -171,7 +171,7 @@ def write_csv(df, path_output_dir,sensor_type):
         # 書き込むディレクトリを選択: Quat
         ## ディレクトリの確認
         if sensor_type == 'qags':
-            target_path = setup_dir(os.path.join(path_output_dir, "Quat", "quat"))
+            target_path = setup_dir(os.path.join(path_output_dir, "quat"))
             ## 書き込みファイルを指定
             target_file_name = group+"00_quat.csv"
             # CSV書き込み
