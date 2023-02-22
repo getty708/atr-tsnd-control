@@ -9,7 +9,7 @@ from omegaconf import DictConfig, OmegaConf
 logger = getLogger(__name__)
 
 
-@hydra.main(config_path="conf", config_name="config.yaml")
+@hydra.main(version_base=None, config_path="conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
     logger.info("== Initialize Sensor Node Parameters ==")

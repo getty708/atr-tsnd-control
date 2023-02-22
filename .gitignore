@@ -671,3 +671,4 @@ FodyWeavers.xsd
 
 # === Custom Setting ==
 .python-version
+outputs/
