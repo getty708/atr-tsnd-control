@@ -1,5 +1,3 @@
-""" Record Sensor Data
-"""
 from tsndctl.device import TSND151
 import time
 import hydra

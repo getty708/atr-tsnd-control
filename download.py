@@ -1,5 +1,3 @@
-""" Download Data in Device's Memory.
-"""
 from tsndctl.device import TSND151
 import time
 import hydra

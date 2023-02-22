@@ -58,7 +58,7 @@ poetry run python check_memory.py
 poetry run python clear_mem.py
 ```
 
-### Download Recorded Data
+### (Beta) Download Recorded Data
 
 Data is stored as logfile on `./outputs/ATR0X/YYYY-mm-dd/HH-MM-SS/download.log`
 
@@ -83,10 +83,6 @@ Which entry do you want to download ? (Entry.1 ~ 4) [type the number] >>
 ```
 
 For convert logfile to CSV, check [this notebook](https://github.com/getty708/atr-tk/blob/master/control/notebooks/Dev_CheckDownloadedRecords.ipynb).
-
-## Supported Command
-
-TBA
 
 ## Reference
 

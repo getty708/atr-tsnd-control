@@ -1,15 +1,15 @@
-""" Initialize sensor nodes parameters.
-"""
 from tsndctl.device import TSND151
 import time
 from logging import getLogger
+import os
 import hydra
 from omegaconf import DictConfig, OmegaConf
 
 logger = getLogger(__name__)
 
+print(os.getcwd())
 
-@hydra.main(version_base=None, config_path="conf", config_name="config.yaml")
+@hydra.main(version_base=None, config_path=f"{os.getcwd()}/conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
     logger.info("== Initialize Sensor Node Parameters ==")
