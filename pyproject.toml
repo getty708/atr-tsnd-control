@@ -17,9 +17,6 @@ pandas = "^1.5.3"
 pytest = "^7.2.1"
 
 
-[tool.poetry.scripts]
-tsndctl-check = "tsndctl.bin.check_device_status:main"
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
