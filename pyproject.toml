@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "atr-toolkit"
+name = "atr-tsnd-control"
 version = "0.1.0"
 description = ""
 authors = ["Naoya Yoshimura <yoshimura708x@gmail.com>"]
 license = "MIT"
+packages = [{include = "tsndctl"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
