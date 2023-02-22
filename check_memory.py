@@ -1,5 +1,3 @@
-""" Clear Memory
-"""
 from tsndctl.device import TSND151
 import time
 import hydra
@@ -12,20 +10,15 @@ logger = getLogger(__name__)
 @hydra.main(config_path="conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
-    logger.info("== Check Device Status ==")
+    logger.info("== Check Memory ==")
     
     # -- Initialize client object --
     client = TSND151(cfg.client.name, cfg.client.port, timeout=cfg.timeout)
     time.sleep(5)
     logger.debug("Success ... Initialize TSND151() object and open connection.")
     
-    # -- Check Memory Counts --
-    outputs = client.check_memory_status()
-    time.sleep(5)
-    # num_entry = outputs["MemEntryCount"]["num_entry"]
-    
-    # -- Check Device Paramters --
-    client.get_device_status()
+    # -- Update Senor Parameters --
+    client.check_entry_details()
     time.sleep(5)
     
     # -- End --

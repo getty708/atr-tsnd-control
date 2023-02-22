@@ -1,17 +1,14 @@
-""" Record Sensor Data
-"""
 from tsndctl.device import TSND151
 import time
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from logging import getLogger
-
 logger = getLogger(__name__)
 
 @hydra.main(config_path="conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
-    logger.info("== Sensor Data Recording ==")
+    logger.info("== Download Data in Device's Memory ==")
 
     # == Initialize client object ==
     client = TSND151(
@@ -22,14 +19,19 @@ def main(cfg: DictConfig):
     logger.debug("Success ... Initialize TSND151() object and open connection.")
     
     # == Sensor Data Recoring ==
-    # -- Stop Recording --
-    logger.info("Stop Recording")
-    client.stop_recording()
-    
-    # -- Check Memory Counts Again --
-    time.sleep(10)
-    client.check_memory_status()
+    # -- Check Memory Counts --
+    outputs = client.check_memory_status()
     time.sleep(5)
+    num_entry = outputs["MemEntryCount"]["num_entry"]
+    
+    # -- Download --
+    # client.start_recording()
+    if num_entry > 0:
+        print(f"Which entry do you want to download ? (Entry.1 ~ {num_entry}) [type the number] >> ")
+        entry_index= int(input())
+        assert entry_index > 0 and entry_index <= num_entry
+        client.read_mem_data(entry_index)
+        time.sleep(2)
 
     # == End ==
     client.terminate()

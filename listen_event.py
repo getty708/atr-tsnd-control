@@ -1,29 +1,33 @@
-""" Clear Memory
-"""
 from tsndctl.device import TSND151
 import time
 import hydra
 from omegaconf import DictConfig, OmegaConf
 from logging import getLogger
-
 logger = getLogger(__name__)
-
 
 @hydra.main(config_path="conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
-    logger.info("== Check Memory ==")
-    
-    # -- Initialize client object --
+    logger.info("== Listen Event ==")
+
+    # == Initialize client object ==
     client = TSND151(cfg.client.name, cfg.client.port, timeout=cfg.timeout)
     time.sleep(5)
     logger.debug("Success ... Initialize TSND151() object and open connection.")
     
-    # -- Update Senor Parameters --
-    client.check_entry_details()
-    time.sleep(5)
+    # == Listern Event ==
+    client.start_event_listener()
+    logger.debug("Event Listener Started")
+    try:
+        while True:
+            time.sleep(10)
+    except KeyboardInterrupt:
+        # -- Stop Recording --
+        logger.info("Stop Event Listerner")
+        client.stop_event_listener()
+    time.sleep(cfg.timeout)
     
-    # -- End --
+    # == End ==
     client.terminate()
     logger.info("Success ... Connection closed.")
 

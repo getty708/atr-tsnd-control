@@ -1,5 +1,3 @@
-""" Record Sensor Data
-"""
 from tsndctl.device import TSND151
 import time
 import hydra
@@ -8,29 +6,22 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+
 @hydra.main(config_path="conf", config_name="config.yaml")
 def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
-    logger.info("== Sensor Data Recording ==")
-
-    # == Initialize client object ==
-    client = TSND151(
-        cfg.client.name, cfg.client.port,
-        timeout=cfg.timeout,
-    )
+    logger.info("== Check & Clear Memory ==")
+    
+    # -- Initialize client object --
+    client = TSND151(cfg.client.name, cfg.client.port, timeout=cfg.timeout)
     time.sleep(5)
     logger.debug("Success ... Initialize TSND151() object and open connection.")
     
-    # == Sensor Data Recoring ==
-    # -- Check Memory Counts --
-    client.check_memory_status()
-    
-    # -- Start Recording --
-    client.start_recording()
+    # -- Update Senor Parameters --
+    client.clear_memory()
     time.sleep(5)
-    logger.debug("Recording Started (?)")
     
-    # == End ==
+    # -- End --
     client.terminate()
     logger.info("Success ... Connection closed.")
 
