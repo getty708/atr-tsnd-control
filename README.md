@@ -38,14 +38,14 @@ client choices:
 ### Recoding
 
 ```bash
-# Start 
-poetry run python start_recording.py client=<client>
+# Start Recording
+poetry run python start_recording.py
 
-# Monitor the Values
-poetry run python listen_event.py client=<client>
+# Monitor the Recorded Values
+poetry run python listen_event.py
 
-# Stop
-poetry run python stop_recording.py client=<client>
+# Stop Recording
+poetry run python stop_recording.py
 ```
 
 ### Memory
